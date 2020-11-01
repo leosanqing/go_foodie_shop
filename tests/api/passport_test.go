@@ -52,7 +52,7 @@ func TestPingRoute(t *testing.T) {
 func TestResisterRoute(t *testing.T) {
 	//bodyStr := `{"username":"pipizhu","password":"12345678","confirmPassword":"12345678"}`
 
-	marshal, _ := json.Marshal(&service.UserRegisterService{
+	marshal, _ := json.Marshal(&service.PassportService{
 		Username:        "pipizhu",
 		Password:        "12345678",
 		PasswordConfirm: "12345678",
