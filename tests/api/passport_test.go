@@ -83,6 +83,24 @@ func TestUsernameExist(t *testing.T) {
 
 }
 
+func TestLogin(t *testing.T) {
+	marshal, _ := json.Marshal(&service.PassportService{
+		Username: "leosanqing",
+		Password: "123456",
+	})
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/api/v1/passport/login", NewBuffer(marshal))
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, 200, w.Code)
+
+	var dat map[string]interface{}
+
+	json.Unmarshal([]byte(w.Body.String()), &dat)
+	assert.Equal(t, 200, dat["status"])
+
+}
+
 func NewBufferString(body string) io.Reader {
 	return bytes.NewBufferString(body)
 }

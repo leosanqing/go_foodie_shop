@@ -4,19 +4,7 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"go-foodie-shop/serializer"
-	"go-foodie-shop/service"
 )
-
-// UserLogin 用户登录接口
-func UserLogin(c *gin.Context) {
-	var loginService service.UserLoginService
-	if err := c.ShouldBind(&loginService); err == nil {
-		res := loginService.Login(c)
-		c.JSON(200, res)
-	} else {
-		c.JSON(200, ErrorResponse(err))
-	}
-}
 
 // UserMe 用户详情
 func UserMe(c *gin.Context) {

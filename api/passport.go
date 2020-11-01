@@ -26,7 +26,7 @@ func UsernameIsExist(c *gin.Context) {
 // UserLogin 用户登录接口
 func UserLogin(c *gin.Context) {
 	var loginService service.PassportService
-	if err := c.ShouldBind(&loginService); err == nil {
+	if err := c.ShouldBindJSON(&loginService); err == nil {
 		res := loginService.Login(c)
 		c.JSON(200, res)
 	} else {

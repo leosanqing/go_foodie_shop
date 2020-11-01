@@ -62,6 +62,7 @@ func (service *PassportService) Login(c *gin.Context) serializer.Response {
 		return serializer.ParamErr("账号或密码错误", nil)
 	}
 
+	setCookie(c, &user)
 	return serializer.BuildUserResponse(user)
 }
 

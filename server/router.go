@@ -23,14 +23,15 @@ func NewRouter() *gin.Engine {
 		{
 			//  判断用户名是否存在
 			passport.GET("usernameIsExist", api.UsernameIsExist)
+
 			// 用户注册
 			passport.POST("regist", api.UserRegister)
+
+			// 用户登录
+			passport.POST("login", api.UserLogin)
 		}
 
 		v1.GET("ping", api.Ping)
-
-		// 用户登录
-		v1.POST("user/login", api.UserLogin)
 
 		// 需要登录保护的
 		auth := v1.Group("")
