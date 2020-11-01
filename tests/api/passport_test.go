@@ -52,7 +52,7 @@ func TestPingRoute(t *testing.T) {
 func TestResisterRoute(t *testing.T) {
 	//bodyStr := `{"username":"pipizhu","password":"12345678","confirmPassword":"12345678"}`
 
-	marshal, _ := json.Marshal(&service.UserRegisterService{
+	marshal, _ := json.Marshal(&service.PassportService{
 		Username:        "pipizhu",
 		Password:        "12345678",
 		PasswordConfirm: "12345678",
@@ -80,6 +80,24 @@ func TestUsernameExist(t *testing.T) {
 
 	json.Unmarshal([]byte(w.Body.String()), &dat)
 	assert.Equal(t, "用户名已经注册", dat["msg"])
+
+}
+
+func TestLogin(t *testing.T) {
+	marshal, _ := json.Marshal(&service.PassportService{
+		Username: "leosanqing",
+		Password: "123456",
+	})
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/api/v1/passport/login", NewBuffer(marshal))
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, 200, w.Code)
+
+	var dat map[string]interface{}
+
+	json.Unmarshal([]byte(w.Body.String()), &dat)
+	assert.Equal(t, 200, dat["status"])
 
 }
 
