@@ -1,22 +1,11 @@
 package api
 
 import (
-	"foodie-shop-go/serializer"
-	"foodie-shop-go/service"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"go-foodie-shop/serializer"
+	"go-foodie-shop/service"
 )
-
-// UserRegister 用户注册接口
-func UserRegister(c *gin.Context) {
-	var service service.UserRegisterService
-	if err := c.ShouldBind(&service); err == nil {
-		res := service.Register()
-		c.JSON(200, res)
-	} else {
-		c.JSON(200, ErrorResponse(err))
-	}
-}
 
 // UserLogin 用户登录接口
 func UserLogin(c *gin.Context) {
@@ -42,7 +31,7 @@ func UserLogout(c *gin.Context) {
 	s.Clear()
 	s.Save()
 	c.JSON(200, serializer.Response{
-		Code: 0,
-		Msg:  "登出成功",
+		Status: 0,
+		Msg:    "登出成功",
 	})
 }

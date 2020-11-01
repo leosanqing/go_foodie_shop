@@ -19,10 +19,15 @@ func NewRouter() *gin.Engine {
 	// 路由
 	v1 := r.Group("/api/v1")
 	{
-		v1.POST("ping", api.Ping)
+		passport := v1.Group("passport")
+		{
+			//  判断用户名是否存在
+			passport.GET("usernameIsExist", api.UsernameIsExist)
+			// 用户注册
+			passport.POST("regist", api.UserRegister)
+		}
 
-		// 用户登录
-		v1.POST("user/register", api.UserRegister)
+		v1.GET("ping", api.Ping)
 
 		// 用户登录
 		v1.POST("user/login", api.UserLogin)

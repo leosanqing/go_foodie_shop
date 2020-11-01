@@ -36,6 +36,7 @@ func BuildUser(user model.Users) Users {
 // BuildUserResponse 序列化用户响应
 func BuildUserResponse(user model.Users) Response {
 	return Response{
-		Data: BuildUser(user),
+		Status: 200,
+		Data:   BuildUser(user),
 	}
 }
