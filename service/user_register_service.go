@@ -1,42 +1,44 @@
 package service
 
 import (
-	"foodie-shop-go/model"
-	"foodie-shop-go/serializer"
+	"go-foodie-shop/model"
+	"go-foodie-shop/serializer"
+	"go-foodie-shop/util"
+	"strconv"
+	"time"
 )
 
 // UserRegisterService 管理用户注册服务
 type UserRegisterService struct {
-	Nickname        string `form:"nickname" json:"nickname" binding:"required,min=2,max=30"`
-	UserName        string `form:"user_name" json:"user_name" binding:"required,min=5,max=30"`
-	Password        string `form:"password" json:"password" binding:"required,min=8,max=40"`
-	PasswordConfirm string `form:"password_confirm" json:"password_confirm" binding:"required,min=8,max=40"`
+	Username        string `form:"username" json:"username" binding:"required,min=5,max=30"`
+	Password        string `form:"password" json:"password" binding:"required,min=6,max=40"`
+	PasswordConfirm string `form:"confirmPassword" json:"confirmPassword" binding:"required,min=6,max=40"`
 }
 
 // valid 验证表单
 func (service *UserRegisterService) valid() *serializer.Response {
 	if service.PasswordConfirm != service.Password {
 		return &serializer.Response{
-			Code: 40001,
-			Msg:  "两次输入的密码不相同",
+			Status: 500,
+			Msg:    "两次输入的密码不相同",
 		}
 	}
 
 	count := 0
-	model.DB.Model(&model.Users{}).Where("nickname = ?", service.Nickname).Count(&count)
+	model.DB.Model(&model.Users{}).Where("username = ?", service.Username).Count(&count)
 	if count > 0 {
 		return &serializer.Response{
-			Code: 40001,
-			Msg:  "昵称被占用",
+			Status: 500,
+			Msg:    "用户名被占用",
 		}
 	}
 
 	count = 0
-	model.DB.Model(&model.Users{}).Where("user_name = ?", service.UserName).Count(&count)
+	model.DB.Model(&model.Users{}).Where("username = ?", service.Username).Count(&count)
 	if count > 0 {
 		return &serializer.Response{
-			Code: 40001,
-			Msg:  "用户名已经注册",
+			Status: 40001,
+			Msg:    "用户名已经注册",
 		}
 	}
 
@@ -44,20 +46,36 @@ func (service *UserRegisterService) valid() *serializer.Response {
 }
 
 // Register 用户注册
-func (service *UserRegisterService) Register() serializer.Response {
-	user := model.Users{
-		Nickname: service.Nickname,
-		Username: service.UserName,
-	}
-
+func (service *UserRegisterService) Register() (*model.Users, serializer.Response) {
 	// 表单验证
 	if err := service.valid(); err != nil {
-		return *err
+		return nil, *err
 	}
 
-	// 加密密码
+	if exist := UsernameExist(service.Username); exist.Status != 200 {
+		return nil, exist
+	}
+
+	id, err := util.NextId()
+	if err != nil {
+		return nil, serializer.Err(
+			serializer.GenerateIdFailed,
+			"生成Id失败",
+			err,
+		)
+	}
+	var (
+		user = model.Users{
+			Id:          strconv.Itoa(int(id)),
+			Username:    service.Username,
+			CreatedTime: time.Now(),
+			UpdatedTime: time.Now(),
+			Sex:         2,
+			Nickname:    service.Username,
+		} // 加密密码
+	)
 	if err := user.SetPassword(service.Password); err != nil {
-		return serializer.Err(
+		return nil, serializer.Err(
 			serializer.CodeEncryptError,
 			"密码加密失败",
 			err,
@@ -66,8 +84,8 @@ func (service *UserRegisterService) Register() serializer.Response {
 
 	// 创建用户
 	if err := model.DB.Create(&user).Error; err != nil {
-		return serializer.ParamErr("注册失败", err)
+		return nil, serializer.ParamErr("注册失败", err)
 	}
 
-	return serializer.BuildUserResponse(user)
+	return &user, serializer.Response{Status: 200}
 }
