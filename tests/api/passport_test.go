@@ -5,11 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/assert"
 	"go-foodie-shop/model"
-	"go-foodie-shop/server"
 	"go-foodie-shop/service"
 	"io"
 	"net/http"
@@ -22,19 +20,6 @@ import (
 var (
 	r *gin.Engine
 )
-
-func setup() {
-	db, err := gorm.Open("mysql", "root:123456@tcp(127.0.0.1:3306)/foodie-shop-dev?charset=utf8&parseTime=True&loc=Local")
-	model.DB = db
-	if err != nil {
-		panic(err)
-	}
-
-	model.DB.AutoMigrate(&model.Users{})
-	// 装载路由
-	r = server.NewRouter()
-
-}
 
 func TestPingRoute(t *testing.T) {
 
@@ -65,8 +50,9 @@ func TestResisterRoute(t *testing.T) {
 
 	var user model.Users
 	model.DB.Where("username=?", "pipizhu").First(&user)
+
+	defer model.DB.Where("username=?", "pipizhu").Delete(&user)
 	assert.Equal(t, user.Username, "pipizhu")
-	model.DB.Where("username=?", "pipizhu").Delete(&user)
 }
 
 func TestUsernameExist(t *testing.T) {
