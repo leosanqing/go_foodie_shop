@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
+	"go-foodie-shop/serializer"
 	"go-foodie-shop/service"
 )
 
@@ -32,4 +33,23 @@ func UserLogin(c *gin.Context) {
 	} else {
 		c.JSON(200, ErrorResponse(err))
 	}
+}
+
+// UserLogout 用户退出
+func UserLogout(c *gin.Context) {
+	deleteCookie(c)
+	c.JSON(200, serializer.Response{
+		Status: 200,
+		Msg:    "登出成功",
+	})
+}
+
+func deleteCookie(c *gin.Context) {
+	c.SetCookie("user",
+		"",
+		-1,
+		"/",
+		"localhost",
+		false,
+		false)
 }

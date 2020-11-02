@@ -97,7 +97,23 @@ func TestLogin(t *testing.T) {
 	var dat map[string]interface{}
 
 	json.Unmarshal([]byte(w.Body.String()), &dat)
-	assert.Equal(t, 200, dat["status"])
+	assert.Equal(t, "登录成功", dat["msg"])
+
+}
+
+func TestLogout(t *testing.T) {
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("DELETE", "/api/v1/passport/logout", nil)
+	//cookie, err := req.Cookie("user")
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, 200, w.Code)
+
+	var dat map[string]interface{}
+
+	json.Unmarshal([]byte(w.Body.String()), &dat)
+	assert.Equal(t, "登出成功", dat["msg"])
 
 }
 

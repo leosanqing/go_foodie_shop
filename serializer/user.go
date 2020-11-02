@@ -1,9 +1,5 @@
 package serializer
 
-import (
-	"go-foodie-shop/model"
-)
-
 // Users 用户序列化器
 
 type Users struct {
@@ -21,22 +17,22 @@ type Users struct {
 	UpdateTime int64  `json:"updateTime"`
 }
 
-// BuildUser 序列化用户
-func BuildUser(user model.Users) Users {
-	return Users{
-		Id:       user.Id,
-		Username: user.Username,
-		Nickname: user.Nickname,
-		Face:     user.Face,
-		Mobile:   user.Mobile,
-		Sex:      user.Sex,
-	}
-}
-
-// BuildUserResponse 序列化用户响应
-func BuildUserResponse(user model.Users) Response {
-	return Response{
-		Status: 200,
-		Data:   BuildUser(user),
-	}
-}
+//// BuildUser 序列化用户
+//func BuildUser(user model.Users) Users {
+//	return Users{
+//		Id:       user.Id,
+//		Username: user.Username,
+//		Nickname: user.Nickname,
+//		Face:     user.Face,
+//		Mobile:   user.Mobile,
+//		Sex:      user.Sex,
+//	}
+//}
+//
+//// BuildUserResponse 序列化用户响应
+//func BuildUserResponse(user model.Users) Response {
+//	return Response{
+//		Status: 200,
+//		Data:   BuildUser(user),
+//	}
+//}

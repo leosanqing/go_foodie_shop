@@ -29,6 +29,8 @@ func NewRouter() *gin.Engine {
 
 			// 用户登录
 			passport.POST("login", api.UserLogin)
+			// 用户退出
+			passport.DELETE("logout", api.UserLogout)
 		}
 
 		v1.GET("ping", api.Ping)
@@ -38,7 +40,7 @@ func NewRouter() *gin.Engine {
 		auth.Use(middleware.AuthRequired())
 		{
 			// User Routing
-			auth.GET("user/me", api.UserMe)
+			//auth.GET("user/me", api.UserMe)
 			auth.DELETE("user/logout", api.UserLogout)
 		}
 	}

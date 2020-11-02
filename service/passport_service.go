@@ -63,7 +63,10 @@ func (service *PassportService) Login(c *gin.Context) serializer.Response {
 	}
 
 	setCookie(c, &user)
-	return serializer.BuildUserResponse(user)
+	return serializer.Response{
+		Status: 200,
+		Msg:    "登录成功",
+	}
 }
 
 func setCookie(c *gin.Context, user *model.Users) {
