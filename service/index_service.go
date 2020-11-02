@@ -3,7 +3,6 @@ package service
 import (
 	"go-foodie-shop/model"
 	"go-foodie-shop/serializer"
-	"go-foodie-shop/util"
 )
 
 func QueryCarouselList() serializer.Response {
@@ -20,6 +19,6 @@ func QueryCarouselList() serializer.Response {
 	return serializer.Response{
 		Status: 200,
 		Msg:    "success",
-		Data:   util.Obj2String(carousel),
+		Data:   carousel,
 	}
 }
