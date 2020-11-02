@@ -1,6 +1,7 @@
 package util
 
 import (
+	"encoding/json"
 	"math/rand"
 	"time"
 )
@@ -15,4 +16,9 @@ func RandStringRunes(n int) string {
 		b[i] = letterRunes[rand.Intn(len(letterRunes))]
 	}
 	return string(b)
+}
+
+func Obj2String(obj interface{}) []byte {
+	marshal, _ := json.Marshal(obj)
+	return marshal
 }

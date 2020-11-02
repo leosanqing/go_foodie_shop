@@ -33,6 +33,11 @@ func NewRouter() *gin.Engine {
 			passport.DELETE("logout", api.UserLogout)
 		}
 
+		index := v1.Group("index")
+		{
+			index.GET("carousel", api.Carousel)
+		}
+
 		v1.GET("ping", api.Ping)
 
 		// 需要登录保护的
