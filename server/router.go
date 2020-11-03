@@ -36,6 +36,8 @@ func NewRouter() *gin.Engine {
 		index := v1.Group("index")
 		{
 			index.GET("carousel", api.Carousel)
+			index.GET("cats", api.Cats)
+			index.GET("subCat/:rootCatId", api.SubCats)
 		}
 
 		v1.GET("ping", api.Ping)
