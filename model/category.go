@@ -25,3 +25,41 @@ type SubCategoryVO struct {
 	SubType     string `json:"subType"`
 	SubFatherId int    `json:"subFatherId"`
 }
+
+type SubCategory struct {
+	Id          int    `json:"id"`
+	Name        string `json:"name"`
+	Type        string `json:"type"`
+	FatherId    int    `json:"fatherId"`
+	SubId       int    `json:"subId"`
+	SubName     string `json:"subName"`
+	SubType     string `json:"subType"`
+	SubFatherId int    `json:"subFatherId"`
+}
+
+type NewItems struct {
+	RootCatId   int    `json:"rootCatId"`
+	RootCatName string `json:"rootCatName"`
+	Slogan      string `json:"slogan"`
+	CatImage    string `json:"catImage"`
+	BgColor     string `json:"bgColor"`
+
+	ItemId   string `json:"itemId"`
+	ItemName string `json:"itemName"`
+	ItemUrl  string `json:"itemUrl"`
+}
+
+type NewItemsVO struct {
+	RootCatId      int            `json:"rootCatId"`
+	RootCatName    string         `json:"rootCatName"`
+	Slogan         string         `json:"slogan"`
+	CatImage       string         `json:"catImage"`
+	BgColor        string         `json:"bgColor"`
+	SimpleItemList []SimpleItemVO `json:"simpleItemList"`
+}
+
+type SimpleItemVO struct {
+	ItemId   string `json:"itemId"`
+	ItemName string `json:"itemName"`
+	ItemUrl  string `json:"itemUrl"`
+}
