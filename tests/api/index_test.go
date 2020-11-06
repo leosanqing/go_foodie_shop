@@ -22,7 +22,7 @@ func TestQueryCarousel(t *testing.T) {
 
 	var res serializer.Response
 
-	json.Unmarshal([]byte(w.Body.String()), &res)
+	_ = json.Unmarshal([]byte(w.Body.String()), &res)
 	//var carousels []model.Carousel
 	carousels := res.Data.([]interface{})
 	assert.Equal(t, 4, len(carousels))
@@ -40,7 +40,7 @@ func TestQueryCats(t *testing.T) {
 
 	var res serializer.Response
 
-	json.Unmarshal([]byte(w.Body.String()), &res)
+	_ = json.Unmarshal([]byte(w.Body.String()), &res)
 	//var carousels []model.Carousel
 	cats := res.Data.([]interface{})
 	assert.Equal(t, 10, len(cats))
@@ -58,7 +58,7 @@ func TestQuerySubCats(t *testing.T) {
 
 	var res serializer.Response
 
-	json.Unmarshal([]byte(w.Body.String()), &res)
+	_ = json.Unmarshal([]byte(w.Body.String()), &res)
 	var categoryVOS []model.CategoryVO
 	_ = gconv.SliceStruct(res.Data, &categoryVOS)
 
@@ -96,7 +96,7 @@ func TestSixNewItems(t *testing.T) {
 	var res serializer.Response
 
 	var sixItems []model.NewItemsVO
-	json.Unmarshal([]byte(w.Body.String()), &res)
+	_ = json.Unmarshal([]byte(w.Body.String()), &res)
 	_ = gconv.SliceStruct(res.Data, &sixItems)
 
 	assert.Equal(t, 1, len(sixItems))
