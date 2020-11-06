@@ -155,25 +155,6 @@ func handleSubCats(subCats []model.SubCategory) []model.CategoryVO {
 	return catVOS
 }
 
-//
-//func QueryThirdCat(id int) ([]model.SubCategoryVO, error) {
-//	var subCatVOS []model.SubCategoryVO
-//	err := model.DB.
-//		Raw(
-//			"SELECT\n"+
-//				"	f.id as sub_id,\n"+
-//				"	f.`name` as `sub_name`,\n"+
-//				"	f.type as sub_type,\n"+
-//				"	f.father_id as sub_father_id\n"+
-//				"FROM\n"+
-//				"	category f\n"+
-//				"	WHERE f.father_id = ?",
-//			id).
-//		Scan(&subCatVOS).Error
-//
-//	return subCatVOS, err
-//}
-
 func QuerySixNewItems(id int) serializer.Response {
 	var newItems []model.NewItems
 	err := model.DB.
@@ -197,8 +178,7 @@ func QuerySixNewItems(id int) serializer.Response {
 				"	and i.root_cat_id = ?\n"+
 				"	and ii.is_main = 1\n"+
 				"	order by i.created_time	DESC\n"+
-				"LIMIT 0,6",
-			id).
+				"LIMIT 0,6", id).
 		Scan(&newItems).Error
 
 	if err != nil {
@@ -218,5 +198,27 @@ func QuerySixNewItems(id int) serializer.Response {
 }
 
 func handleItems(newItems []model.NewItems) []model.NewItemsVO {
-	return nil
+	if len(newItems) == 0 {
+		return nil
+	}
+	var newItemsVOS []model.NewItemsVO
+	var newItemsVO model.NewItemsVO
+
+	var simpleItems []model.SimpleItemVO
+	var simpleItem model.SimpleItemVO
+	for _, item := range newItems {
+		simpleItem.ItemId = item.ItemId
+		simpleItem.ItemName = item.ItemName
+		simpleItem.ItemUrl = item.ItemUrl
+		simpleItems = append(simpleItems, simpleItem)
+	}
+	// 只会有一个分类
+	items := newItems[0]
+	newItemsVO.BgColor = items.BgColor
+	newItemsVO.CatImage = items.CatImage
+	newItemsVO.RootCatId = items.RootCatId
+	newItemsVO.RootCatName = items.RootCatName
+	newItemsVO.Slogan = items.Slogan
+	newItemsVO.SimpleItemList = simpleItems
+	return append(newItemsVOS, newItemsVO)
 }
