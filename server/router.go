@@ -41,6 +41,11 @@ func NewRouter() *gin.Engine {
 			index.GET("sixNewItems/:rootCatId", api.GetSixNewItems)
 		}
 
+		item := v1.Group("items")
+		{
+			item.GET("info/:itemId", api.ItemInfo)
+		}
+
 		v1.GET("ping", api.Ping)
 
 		// 需要登录保护的
