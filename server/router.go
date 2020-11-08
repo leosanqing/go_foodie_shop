@@ -44,6 +44,7 @@ func NewRouter() *gin.Engine {
 		item := v1.Group("items")
 		{
 			item.GET("info/:itemId", api.ItemInfo)
+			item.GET("commentLevel", api.CommentLevelCounts)
 		}
 
 		v1.GET("ping", api.Ping)
