@@ -8,6 +8,7 @@ import (
 	"go-foodie-shop/model"
 	"go-foodie-shop/serializer"
 	"go-foodie-shop/service"
+	"go-foodie-shop/util"
 	"go.uber.org/zap"
 )
 
@@ -87,6 +88,37 @@ func CommentLevelCounts(c *gin.Context) {
 			})
 		}
 	} else {
-		c.JSON(4001, ErrorResponse(err))
+		c.JSON(400, ErrorResponse(err))
+	}
+}
+
+// QueryComments 评价
+func QueryComments(c *gin.Context) {
+	var commentService service.CommentService
+	if err := c.ShouldBind(&commentService); err == nil {
+		if itemCommentVOS, total, err := commentService.QueryComment(); err != nil {
+			log.ServiceLog.Error(
+				"查询商品评价失败",
+				zap.String("itemId", commentService.ItemId),
+				zap.Error(err),
+			)
+			c.JSON(200, ErrorResponse(errors.New("查询商品评价失败")))
+		} else {
+			log.ServiceLog.Info(
+				"查询商品评价成功",
+				zap.Any("itemCommentVOS", itemCommentVOS),
+			)
+			// 脱敏处理
+			for index := range itemCommentVOS {
+				itemCommentVOS[index].Nickname = util.CommonDisplay(itemCommentVOS[index].Nickname)
+			}
+			result := util.PagedGridResult(itemCommentVOS, total, commentService.Page, commentService.PageSize)
+			c.JSON(200, serializer.Response{
+				Status: Success,
+				Data:   result,
+			})
+		}
+	} else {
+		c.JSON(400, ErrorResponse(err))
 	}
 }

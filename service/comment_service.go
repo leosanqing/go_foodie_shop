@@ -1,12 +1,15 @@
 package service
 
-import "go-foodie-shop/model"
+import (
+	"go-foodie-shop/model"
+	"go-foodie-shop/util"
+)
 
 type CommentService struct {
-	ItemId   string `form:"itemId" json:"itemId" binding:"required,max=30"`
-	Level    int    `form:"level" json:"level" `
-	Page     int    `form:"page" json:"page" `
-	PageSize int    `form:"pageSize" json:"pageSize" `
+	ItemId   string             `form:"itemId" json:"itemId" binding:"required,max=30"`
+	Level    model.CommentLevel `form:"level" json:"level" `
+	Page     int                `form:"page" json:"page" `
+	PageSize int                `form:"pageSize" json:"pageSize" `
 }
 
 func (service *CommentService) GetCommentsCount() (model.CommentLevelCountsVO, error) {
@@ -34,4 +37,33 @@ func (service *CommentService) GetCommentsCount() (model.CommentLevelCountsVO, e
 	commentVO.TotalCounts = goodCounts + badCounts + normalCounts
 
 	return commentVO, nil
+}
+
+func (service *CommentService) QueryComment() ([]model.ItemCommentVO, int64, error) {
+
+	var commentVO []model.ItemCommentVO
+	Db := model.DB.
+		Table("items_comments ic").
+		Select("ic.comment_level as comment_level,\n"+
+			"ic.content as content,\n"+
+			"ic.spec_name as spec_name,\n"+
+			"ic.created_time as created_time,\n"+
+			"u.face as user_face,\n"+
+			"u.nickname as nickname").
+		Joins("LEFT JOIN users u ON ic.user_id = u.id").
+		Where("ic.item_id = ?", service.ItemId)
+	if service.Level != 0 {
+		Db.Where("ic.comment_level =", service.Level)
+	}
+
+	var count int64
+	if err := Db.Count(&count).Error; err != nil {
+		return nil, 0, err
+	}
+
+	err := Db.Scopes(util.Paginate(service.Page, service.PageSize)).
+		Find(&commentVO).
+		Error
+	return commentVO, count, err
+	//return model.QueryComment(service.ItemId, service.Level)
 }

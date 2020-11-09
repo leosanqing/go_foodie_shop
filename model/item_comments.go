@@ -38,3 +38,16 @@ func (c *ItemsComments) GetCommentCounts(itemId string, level CommentLevel) (int
 		Count(&count).Error
 	return count, err
 }
+
+type ItemCommentVO struct {
+	CommentLevel CommentLevel `json:"commentLevel"`
+	Content      string       `json:"content"`
+	SpecName     string       `json:"specName"`
+	CreatedTime  time.Time    `json:"createdTime"`
+	UserFace     string       `json:"userFace"`
+	Nickname     string       `json:"nickname"`
+}
+
+//func QueryComment(itemId string, level CommentLevel) ([]ItemCommentVO, error) {
+//
+//}
