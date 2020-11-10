@@ -4,5 +4,12 @@ package model
 
 func migration() {
 	// 自动迁移模式
-	DB.AutoMigrate(&Users{})
+	DB.AutoMigrate(
+		&Users{},
+		&ItemsComments{},
+		&ItemsParam{},
+		&ItemsSpec{},
+		&Carousel{},
+		&Category{},
+	)
 }
