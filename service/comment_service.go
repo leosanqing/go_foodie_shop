@@ -53,7 +53,7 @@ func (service *CommentService) QueryComment() ([]model.ItemCommentVO, int64, err
 		Joins("LEFT JOIN users u ON ic.user_id = u.id").
 		Where("ic.item_id = ?", service.ItemId)
 	if service.Level != 0 {
-		Db.Where("ic.comment_level =", service.Level)
+		Db = Db.Where("ic.comment_level = ? ", service.Level)
 	}
 
 	var count int64

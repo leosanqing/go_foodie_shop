@@ -22,10 +22,10 @@ func Paginate(page int, pageSize int) func(db *gorm.DB) *gorm.DB {
 }
 
 type PageResult struct {
-	Page    int         `json:"page"`
-	Total   int         `json:"total"`
-	Records int64       `json:"records"`
-	Rows    interface{} `json:"rows"`
+	Page    int         `json:"page"`    // 当前页数
+	Total   int         `json:"total"`   // 总页数
+	Records int64       `json:"records"` // 总条数
+	Rows    interface{} `json:"rows"`    // 当前页信息
 }
 
 func PagedGridResult(vo interface{}, total int64, page, pageSize int) PageResult {
