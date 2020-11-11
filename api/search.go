@@ -25,7 +25,7 @@ func SearchItem(c *gin.Context) {
 			return
 		}
 
-		result := util.PagedGridResult(items, count, searchItemService.Page, searchItemService.PageSize)
+		result := util.PagedGridResult(items, count, searchItemService.Page.Page, searchItemService.PageSize)
 
 		c.JSON(200, serializer.Response{
 			Status: 200,

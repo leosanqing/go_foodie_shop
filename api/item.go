@@ -112,7 +112,7 @@ func QueryComments(c *gin.Context) {
 			for index := range itemCommentVOS {
 				itemCommentVOS[index].Nickname = util.CommonDisplay(itemCommentVOS[index].Nickname)
 			}
-			result := util.PagedGridResult(itemCommentVOS, total, commentService.Page, commentService.PageSize)
+			result := util.PagedGridResult(itemCommentVOS, total, commentService.Page.Page, commentService.PageSize)
 			c.JSON(200, serializer.Response{
 				Status: Success,
 				Data:   result,

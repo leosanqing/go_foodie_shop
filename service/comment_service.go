@@ -6,10 +6,9 @@ import (
 )
 
 type CommentService struct {
-	ItemId   string             `form:"itemId" json:"itemId" binding:"required,max=30"`
-	Level    model.CommentLevel `form:"level" json:"level" `
-	Page     int                `form:"page" json:"page" `
-	PageSize int                `form:"pageSize" json:"pageSize" `
+	ItemId string             `form:"itemId" json:"itemId" binding:"required,max=30"`
+	Level  model.CommentLevel `form:"level" json:"level" `
+	model.Page
 }
 
 func (service *CommentService) GetCommentsCount() (model.CommentLevelCountsVO, error) {
@@ -61,7 +60,7 @@ func (service *CommentService) QueryComment() ([]model.ItemCommentVO, int64, err
 		return nil, 0, err
 	}
 
-	err := Db.Scopes(util.Paginate(service.Page, service.PageSize)).
+	err := Db.Scopes(util.Paginate(service.Page.Page, service.PageSize)).
 		Find(&commentVO).
 		Error
 	return commentVO, count, err

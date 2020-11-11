@@ -6,10 +6,10 @@ import (
 )
 
 type SearchItemService struct {
-	Keywords string   `form:"keywords" json:"keywords" binding:"required,min=1,max=30"`
+	Keywords string   `form:"keywords" json:"keywords" binding:"max=30"`
+	CatId    int      `form:"catId" json:"catId" binding:"max=30"`
 	Sort     SortType `form:"sort" json:"sort"`
-	Page     int      `form:"page" json:"page"`
-	PageSize int      `form:"pageSize" json:"pageSize"`
+	model.Page
 }
 
 type SortType string
@@ -60,7 +60,7 @@ func (service *SearchItemService) SearchItems() ([]model.SearchItemsVO, int64, e
 	}
 
 	err := db.
-		Scopes(util.Paginate(service.Page, service.PageSize)).
+		Scopes(util.Paginate(service.Page.Page, service.PageSize)).
 		Find(&searchItems).
 		Error
 

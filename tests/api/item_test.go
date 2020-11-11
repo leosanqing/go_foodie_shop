@@ -49,7 +49,7 @@ func TestItemInfo(t *testing.T) {
 func TestCommentCounts(t *testing.T) {
 
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/api/v1/items/commentLevel?itemId=cake-1001", nil)
+	req, _ := http.NewRequest("GET", "/api/v1/items/commentLevel?itemId=cake-1001&level=&page=1&pageSize=10", nil)
 	//cookie, err := req.Cookie("user")
 	r.ServeHTTP(w, req)
 
