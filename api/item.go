@@ -18,7 +18,7 @@ func ItemInfo(c *gin.Context) {
 	var itemService service.QueryItemService
 	if err := c.ShouldBind(&itemService); err == nil {
 		itemId := c.Param("itemId")
-		err, items := itemService.QueryItemsById(itemId)
+		items, err := itemService.QueryItemsById(itemId)
 		if err != nil {
 			fmt.Println(items)
 			log.ServiceLog.Error("query Item by Id err id ")
@@ -27,7 +27,7 @@ func ItemInfo(c *gin.Context) {
 		}
 		itemVO.Item = items
 
-		err, itemImg := itemService.QueryItemsImgById(itemId)
+		itemImg, err := itemService.QueryItemsImgById(itemId)
 		if err != nil {
 			log.ServiceLog.Error("query ItemImg by Id err id ")
 			c.JSON(200, ErrorResponse(errors.New("查询商品失败")))
@@ -35,7 +35,7 @@ func ItemInfo(c *gin.Context) {
 		}
 		itemVO.ItemImgList = itemImg
 
-		err, specs := itemService.QueryItemSpec(itemId)
+		specs, err := itemService.QueryItemSpec(itemId)
 		if err != nil {
 			log.ServiceLog.Error("query itemSpec by Id err id %s")
 			c.JSON(200, ErrorResponse(errors.New("查询商品规格信息失败")))

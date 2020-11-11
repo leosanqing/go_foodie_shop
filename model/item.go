@@ -21,3 +21,11 @@ type Items struct {
 	CreatedTime time.Time `json:"createdTime"`
 	UpdatedTime time.Time `json:"updatedTime"`
 }
+
+type SearchItemsVO struct {
+	Id         string `json:"id"`
+	ItemName   string `json:"itemName"`
+	SellCounts string `json:"sellCounts"`
+	ImgUrl     string `json:"imgUrl"`
+	Price      int    `json:"price"`
+}

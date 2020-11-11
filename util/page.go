@@ -34,7 +34,11 @@ func PagedGridResult(vo interface{}, total int64, page, pageSize int) PageResult
 	result.Page = page
 	result.Rows = vo
 	result.Records = total
-	result.Total = int(total/int64(pageSize)) + 1
+	if 0 == int(total%int64(pageSize)) {
+		result.Total = int(total / int64(pageSize))
+	} else {
+		result.Total = int(total/int64(pageSize)) + 1
+	}
 
 	return result
 }
