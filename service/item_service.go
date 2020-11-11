@@ -7,32 +7,32 @@ import (
 type QueryItemService struct {
 }
 
-func (service *QueryItemService) QueryItemsById(id string) (error, model.Items) {
+func (service *QueryItemService) QueryItemsById(id string) (model.Items, error) {
 	var item model.Items
 	err := model.DB.
 		Where("id = ?", id).
 		First(&item).
 		Error
 
-	return err, item
+	return item, err
 }
 
-func (service *QueryItemService) QueryItemsImgById(id string) (error, []model.ItemsImg) {
+func (service *QueryItemService) QueryItemsImgById(id string) ([]model.ItemsImg, error) {
 	var itemImg []model.ItemsImg
 	err := model.DB.
 		Where("item_id = ?", id).
 		Find(&itemImg).
 		Error
-	return err, itemImg
+	return itemImg, err
 }
 
-func (service *QueryItemService) QueryItemSpec(itemId string) (error, []model.ItemsSpec) {
+func (service *QueryItemService) QueryItemSpec(itemId string) ([]model.ItemsSpec, error) {
 	var itemSpec []model.ItemsSpec
 	err := model.DB.
 		Where("item_id = ?", itemId).
 		Find(&itemSpec).
 		Error
-	return err, itemSpec
+	return itemSpec, err
 }
 
 func (service *QueryItemService) QueryItemsParam(itemId string) (error, model.ItemsParam) {
