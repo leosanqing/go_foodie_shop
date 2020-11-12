@@ -11,11 +11,14 @@ import (
 	"time"
 )
 
-// PassportService 管理用户注册服务
-type PassportService struct {
-	Username        string `form:"username" json:"username" binding:"required,min=5,max=30"`
-	Password        string `form:"password" json:"password" binding:"required,min=6,max=40"`
-	PasswordConfirm string `form:"confirmPassword" json:"confirmPassword"`
+// RegisterRequest 管理用户注册服务
+type RegisterRequest struct {
+	LoginRequest
+	PasswordConfirm string `form:"confirmPassword" json:"confirmPassword" binding:"eqcsfield=LoginRequest.Password"`
+}
+type LoginRequest struct {
+	Username string `form:"username" json:"username" binding:"required,min=5,max=30"`
+	Password string `form:"password" json:"password" binding:"required,min=6,max=40"`
 }
 
 // Register 用户注册
@@ -40,7 +43,7 @@ func UsernameExist(username string) serializer.Response {
 }
 
 // setSession 设置session
-func (service *PassportService) setSession(c *gin.Context, user model.Users) {
+func (service *RegisterRequest) setSession(c *gin.Context, user model.Users) {
 	s := sessions.Default(c)
 	s.Clear()
 	s.Set("user_id", user.Id)
@@ -48,7 +51,7 @@ func (service *PassportService) setSession(c *gin.Context, user model.Users) {
 }
 
 // Login 用户登录函数
-func (service *PassportService) Login(c *gin.Context) serializer.Response {
+func (service *LoginRequest) Login(c *gin.Context) serializer.Response {
 	var user model.Users
 
 	if err := model.DB.
@@ -91,7 +94,7 @@ func setCookie(c *gin.Context, user *model.Users) {
 }
 
 // valid 验证表单
-func (service *PassportService) valid() *serializer.Response {
+func (service *RegisterRequest) valid() *serializer.Response {
 	if service.PasswordConfirm != service.Password {
 		return &serializer.Response{
 			Status: 500,
@@ -121,7 +124,7 @@ func (service *PassportService) valid() *serializer.Response {
 }
 
 // Register 用户注册
-func (service *PassportService) Register(c *gin.Context) serializer.Response {
+func (service *RegisterRequest) Register(c *gin.Context) serializer.Response {
 	// 表单验证
 	if err := service.valid(); err != nil {
 		return *err

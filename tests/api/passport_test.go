@@ -29,9 +29,11 @@ func TestPingRoute(t *testing.T) {
 func TestResisterRoute(t *testing.T) {
 	//bodyStr := `{"username":"pipizhu","password":"12345678","confirmPassword":"12345678"}`
 
-	marshal, _ := json.Marshal(&service.PassportService{
-		Username:        "pipizhu",
-		Password:        "12345678",
+	marshal, _ := json.Marshal(&service.RegisterRequest{
+		LoginRequest: service.LoginRequest{
+			Username: "pipizhu",
+			Password: "12345678",
+		},
 		PasswordConfirm: "12345678",
 	})
 	w := httptest.NewRecorder()
@@ -45,6 +47,23 @@ func TestResisterRoute(t *testing.T) {
 
 	defer model.DB.Where("username=?", "pipizhu").Delete(&user)
 	assert.Equal(t, "pipizhu", user.Username)
+}
+
+func TestResister_fail(t *testing.T) {
+	//bodyStr := `{"username":"pipizhu","password":"12345678","confirmPassword":"12345678"}`
+
+	marshal, _ := json.Marshal(&service.RegisterRequest{
+		LoginRequest: service.LoginRequest{
+			Username: "pipizhu",
+			Password: "12345678",
+		},
+		PasswordConfirm: "1234567",
+	})
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/api/v1/passport/regist", NewBuffer(marshal))
+	R.ServeHTTP(w, req)
+
+	assert.Equal(t, 400, w.Code)
 }
 
 func TestUsernameExist(t *testing.T) {
@@ -62,7 +81,7 @@ func TestUsernameExist(t *testing.T) {
 }
 
 func TestLogin(t *testing.T) {
-	marshal, _ := json.Marshal(&service.PassportService{
+	marshal, _ := json.Marshal(&service.LoginRequest{
 		Username: "leosanqing",
 		Password: "123456",
 	})
