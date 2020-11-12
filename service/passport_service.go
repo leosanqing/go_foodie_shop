@@ -139,16 +139,16 @@ func (service *PassportService) Register(c *gin.Context) serializer.Response {
 			err,
 		)
 	}
-	var (
-		user = model.Users{
-			Id:          strconv.Itoa(int(id)),
-			Username:    service.Username,
-			CreatedTime: time.Now(),
-			UpdatedTime: time.Now(),
-			Sex:         2,
-			Nickname:    service.Username,
-		} // 加密密码
-	)
+
+	var user = model.Users{
+		Id:          strconv.Itoa(int(id)),
+		Username:    service.Username,
+		CreatedTime: time.Now(),
+		UpdatedTime: time.Now(),
+		Sex:         2,
+		Nickname:    service.Username,
+		Birthday:    time.Date(1900, time.January, 1, 0, 0, 0, 0, time.UTC),
+	} // 加密密码
 	if err := user.SetPassword(service.Password); err != nil {
 		return serializer.Err(
 			serializer.CodeEncryptError,

@@ -17,7 +17,7 @@ func TestSearchItem_sortByDefault(t *testing.T) {
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/items/search?keywords=面&page=1&pageSize=5", nil)
 	//cookie, err := req.Cookie("user")
-	r.ServeHTTP(w, req)
+	R.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
 
@@ -47,7 +47,7 @@ func TestSearchItem_sortByCounts(t *testing.T) {
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/items/search?keywords=面&sort=c&page=1&pageSize=4", nil)
 	//cookie, err := req.Cookie("user")
-	r.ServeHTTP(w, req)
+	R.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
 
@@ -78,7 +78,7 @@ func TestSearchItem_sortByPrice(t *testing.T) {
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/items/search?keywords=面&sort=p&page=1&pageSize=3", nil)
 	//cookie, err := req.Cookie("user")
-	r.ServeHTTP(w, req)
+	R.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
 
@@ -109,7 +109,7 @@ func TestSearchItem_byCatId_sortByDefault(t *testing.T) {
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/items/catItems?catId=37&page=1&pageSize=5", nil)
 	//cookie, err := req.Cookie("user")
-	r.ServeHTTP(w, req)
+	R.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
 
@@ -136,7 +136,7 @@ func TestSearchItem_byCatId_sortByCounts(t *testing.T) {
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/items/catItems?catId=37&sort=c&page=1&pageSize=3", nil)
 	//cookie, err := req.Cookie("user")
-	r.ServeHTTP(w, req)
+	R.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
 
@@ -166,7 +166,7 @@ func TestSearchItem_byCatId_sortByPrice(t *testing.T) {
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/items/catItems?catId=37&sort=p&page=1&pageSize=7", nil)
 	//cookie, err := req.Cookie("user")
-	r.ServeHTTP(w, req)
+	R.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
 
