@@ -90,7 +90,8 @@ func (service *IndexService) QuerySubCats(id string) serializer.Response {
 				"LEFT JOIN\n"+
 				"	category c	on f.id = c.father_id\n"+
 				"WHERE f.father_id = ?", id).
-		Scan(&catVOS).Error
+		Scan(&catVOS).
+		Error
 
 	if err != nil {
 		return serializer.Response{
