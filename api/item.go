@@ -122,3 +122,30 @@ func QueryComments(c *gin.Context) {
 		c.JSON(400, ErrorResponse(err))
 	}
 }
+
+// QueryItemsBySpecIds 刷新购物车
+func QueryItemsBySpecIds(c *gin.Context) {
+	var shopCartService service.ShopCartService
+	if err := c.ShouldBind(&shopCartService); err == nil {
+		if shopCartVOS, err := shopCartService.QueryItemsBySpecIds(); err != nil {
+			log.ServiceLog.Error(
+				"查询商品评价失败",
+				zap.String("itemSpecIds", shopCartService.ItemSpecIds),
+				zap.Error(err),
+			)
+			c.JSON(200, ErrorResponse(errors.New("查询商品信息失败")))
+		} else {
+			log.ServiceLog.Info(
+				"查询商品信息成功",
+				zap.Any("shopCartVOS", shopCartVOS),
+			)
+
+			c.JSON(200, serializer.Response{
+				Status: Success,
+				Data:   shopCartVOS,
+			})
+		}
+	} else {
+		c.JSON(400, ErrorResponse(err))
+	}
+}

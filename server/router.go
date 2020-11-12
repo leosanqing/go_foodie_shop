@@ -48,6 +48,7 @@ func NewRouter() *gin.Engine {
 			item.GET("comments", api.QueryComments)
 			item.GET("search", api.SearchItem)
 			item.GET("catItems", api.SearchItemByCatId)
+			item.GET("refresh", api.QueryItemsBySpecIds)
 		}
 
 		//search := v1.Group("search")
