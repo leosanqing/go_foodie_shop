@@ -112,10 +112,37 @@ func QueryComments(c *gin.Context) {
 			for index := range itemCommentVOS {
 				itemCommentVOS[index].Nickname = util.CommonDisplay(itemCommentVOS[index].Nickname)
 			}
-			result := util.PagedGridResult(itemCommentVOS, total, commentService.Page, commentService.PageSize)
+			result := util.PagedGridResult(itemCommentVOS, total, commentService.Page.Page, commentService.PageSize)
 			c.JSON(200, serializer.Response{
 				Status: Success,
 				Data:   result,
+			})
+		}
+	} else {
+		c.JSON(400, ErrorResponse(err))
+	}
+}
+
+// QueryItemsBySpecIds 刷新购物车
+func QueryItemsBySpecIds(c *gin.Context) {
+	var shopCartService service.ShopCartService
+	if err := c.ShouldBind(&shopCartService); err == nil {
+		if shopCartVOS, err := shopCartService.QueryItemsBySpecIds(); err != nil {
+			log.ServiceLog.Error(
+				"查询商品评价失败",
+				zap.String("itemSpecIds", shopCartService.ItemSpecIds),
+				zap.Error(err),
+			)
+			c.JSON(200, ErrorResponse(errors.New("查询商品信息失败")))
+		} else {
+			log.ServiceLog.Info(
+				"查询商品信息成功",
+				zap.Any("shopCartVOS", shopCartVOS),
+			)
+
+			c.JSON(200, serializer.Response{
+				Status: Success,
+				Data:   shopCartVOS,
 			})
 		}
 	} else {
