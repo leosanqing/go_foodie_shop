@@ -16,7 +16,7 @@ func TestQueryCarousel(t *testing.T) {
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/index/carousel", nil)
 	//cookie, err := req.Cookie("user")
-	r.ServeHTTP(w, req)
+	R.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
 
@@ -40,7 +40,7 @@ func TestQueryCats(t *testing.T) {
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/index/cats", nil)
 	//cookie, err := req.Cookie("user")
-	r.ServeHTTP(w, req)
+	R.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
 
@@ -61,7 +61,7 @@ func TestQuerySubCats(t *testing.T) {
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/index/subCat/1", nil)
 	//cookie, err := req.Cookie("user")
-	r.ServeHTTP(w, req)
+	R.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
 
@@ -98,7 +98,7 @@ func TestSixNewItems(t *testing.T) {
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/index/sixNewItems/1", nil)
 	//cookie, err := req.Cookie("user")
-	r.ServeHTTP(w, req)
+	R.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
 
