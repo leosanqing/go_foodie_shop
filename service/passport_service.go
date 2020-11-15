@@ -150,7 +150,8 @@ func (service *RegisterRequest) Register(c *gin.Context) serializer.Response {
 		UpdatedTime: time.Now(),
 		Sex:         2,
 		Nickname:    service.Username,
-		Birthday:    time.Date(1900, time.January, 1, 0, 0, 0, 0, time.UTC),
+		//Birthday:    time.Date(1900, time.January, 1, 0, 0, 0, 0, time.UTC),
+		Birthday: &model.LocalDate{},
 	} // 加密密码
 	if err := user.SetPassword(service.Password); err != nil {
 		return serializer.Err(

@@ -1,13 +1,11 @@
 package api
 
 import (
-	"bytes"
 	"encoding/json"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/assert"
 	"go-foodie-shop/model"
 	"go-foodie-shop/service"
-	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -112,11 +110,4 @@ func TestLogout(t *testing.T) {
 	json.Unmarshal([]byte(w.Body.String()), &dat)
 	assert.Equal(t, "登出成功", dat["msg"])
 
-}
-
-func NewBufferString(body string) io.Reader {
-	return bytes.NewBufferString(body)
-}
-func NewBuffer(body []byte) io.Reader {
-	return bytes.NewBuffer(body)
 }

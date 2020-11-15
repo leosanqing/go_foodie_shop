@@ -2,9 +2,13 @@ package server
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"go-foodie-shop/advance"
 	"go-foodie-shop/api"
 	c "go-foodie-shop/api/center"
 	"go-foodie-shop/middleware"
+	"go-foodie-shop/model"
+	"gopkg.in/go-playground/validator.v8"
 	"os"
 )
 
@@ -17,6 +21,10 @@ func NewRouter() *gin.Engine {
 	r.Use(middleware.Cors())
 	r.Use(middleware.CurrentUser())
 
+	// 增加自己的注解判断
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		v.RegisterCustomTypeFunc(advance.ValidateJSONDateType, model.LocalTime{})
+	}
 	// 路由
 	v1 := r.Group("/api/v1")
 	{
@@ -65,6 +73,11 @@ func NewRouter() *gin.Engine {
 		center := v1.Group("center")
 		{
 			center.GET("userInfo", c.QueryUserInfo)
+		}
+
+		userInfo := v1.Group("userInfo")
+		{
+			userInfo.POST("update", c.UpdateUserInfo)
 		}
 		//search := v1.Group("search")
 
