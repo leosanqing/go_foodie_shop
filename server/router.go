@@ -9,12 +9,16 @@ import (
 	"go-foodie-shop/middleware"
 	"go-foodie-shop/model"
 	"gopkg.in/go-playground/validator.v8"
+	"net/http"
 	"os"
 )
 
 // NewRouter 路由配置
 func NewRouter() *gin.Engine {
 	r := gin.Default()
+
+	//加载静态资源，一般是上传的资源，例如用户上传的图片
+	r.StaticFS("/img", http.Dir("img"))
 
 	// 中间件, 顺序不能改
 	r.Use(middleware.Session(os.Getenv("SESSION_SECRET")))
@@ -78,6 +82,13 @@ func NewRouter() *gin.Engine {
 		userInfo := v1.Group("userInfo")
 		{
 			userInfo.POST("update", c.UpdateUserInfo)
+			userInfo.POST("uploadFace", c.UploadFace)
+		}
+
+		myComments := v1.Group("mycomment")
+		{
+			myComments.POST("pending", c.Pending)
+			//myComments.POST("uploadFace", c.UploadFace)
 		}
 		//search := v1.Group("search")
 
