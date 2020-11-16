@@ -8,18 +8,18 @@ import (
 // Users 用户模型
 type Users struct {
 	//gorm.Model
-	Id          string `gorm:"primary_key;not null"`
-	Username    string
-	Password    string
-	Nickname    string
-	Realname    string
-	Face        string
-	Mobile      string
-	Email       string
-	Sex         int
-	Birthday    *time.Time
-	CreatedTime time.Time
-	UpdatedTime time.Time
+	Id          string     `gorm:"primary_key;not null" json:"id"`
+	Username    string     `json:"username"`
+	Password    string     `json:"password"`
+	Nickname    string     `json:"nickname"`
+	Realname    string     `json:"realname"`
+	Face        string     `json:"face"`
+	Mobile      string     `json:"mobile"`
+	Email       string     `json:"email"`
+	Sex         int        `json:"sex"`
+	Birthday    *LocalDate `json:"birthday"`
+	CreatedTime time.Time  `json:"createdTime"`
+	UpdatedTime time.Time  `json:"updatedTime"`
 }
 
 const (

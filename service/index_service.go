@@ -5,7 +5,10 @@ import (
 	"go-foodie-shop/serializer"
 )
 
-func QueryCarouselList() serializer.Response {
+type IndexService struct {
+}
+
+func (service *IndexService) QueryCarouselList() serializer.Response {
 	var carousel []model.Carousel
 
 	if err := model.DB.
@@ -23,7 +26,7 @@ func QueryCarouselList() serializer.Response {
 	}
 }
 
-func QueryAllRootLevelCats() serializer.Response {
+func (service *IndexService) QueryAllRootLevelCats() serializer.Response {
 	var cats []model.Category
 	if err := model.DB.
 		Where("type = ?", 1).
@@ -69,7 +72,7 @@ func QueryAllRootLevelCats() serializer.Response {
 //	}
 //}
 
-func QuerySubCats(id int) serializer.Response {
+func (service *IndexService) QuerySubCats(id string) serializer.Response {
 	var catVOS []model.SubCategory
 	err := model.DB.
 		Raw(
@@ -87,7 +90,8 @@ func QuerySubCats(id int) serializer.Response {
 				"LEFT JOIN\n"+
 				"	category c	on f.id = c.father_id\n"+
 				"WHERE f.father_id = ?", id).
-		Scan(&catVOS).Error
+		Scan(&catVOS).
+		Error
 
 	if err != nil {
 		return serializer.Response{
@@ -155,7 +159,7 @@ func handleSubCats(subCats []model.SubCategory) []model.CategoryVO {
 	return catVOS
 }
 
-func QuerySixNewItems(id int) serializer.Response {
+func (service *IndexService) QuerySixNewItems(id string) serializer.Response {
 	var newItems []model.NewItems
 	err := model.DB.
 		Raw(

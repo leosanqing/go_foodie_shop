@@ -1,31 +1,21 @@
 package api
 
 import (
-	"bytes"
 	"encoding/json"
-	"fmt"
-	"github.com/gin-gonic/gin"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/assert"
 	"go-foodie-shop/model"
 	"go-foodie-shop/service"
-	"io"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"testing"
-)
-
-// DB 数据库链接单例
-var (
-	r *gin.Engine
 )
 
 func TestPingRoute(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/ping", nil)
-	r.ServeHTTP(w, req)
+	R.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
 	var dat map[string]interface{}
@@ -37,14 +27,16 @@ func TestPingRoute(t *testing.T) {
 func TestResisterRoute(t *testing.T) {
 	//bodyStr := `{"username":"pipizhu","password":"12345678","confirmPassword":"12345678"}`
 
-	marshal, _ := json.Marshal(&service.PassportService{
-		Username:        "pipizhu",
-		Password:        "12345678",
+	marshal, _ := json.Marshal(&service.RegisterRequest{
+		LoginRequest: service.LoginRequest{
+			Username: "pipizhu",
+			Password: "12345678",
+		},
 		PasswordConfirm: "12345678",
 	})
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "/api/v1/passport/regist", NewBuffer(marshal))
-	r.ServeHTTP(w, req)
+	R.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
 
@@ -52,13 +44,30 @@ func TestResisterRoute(t *testing.T) {
 	model.DB.Where("username=?", "pipizhu").First(&user)
 
 	defer model.DB.Where("username=?", "pipizhu").Delete(&user)
-	assert.Equal(t, user.Username, "pipizhu")
+	assert.Equal(t, "pipizhu", user.Username)
+}
+
+func TestResister_fail(t *testing.T) {
+	//bodyStr := `{"username":"pipizhu","password":"12345678","confirmPassword":"12345678"}`
+
+	marshal, _ := json.Marshal(&service.RegisterRequest{
+		LoginRequest: service.LoginRequest{
+			Username: "pipizhu",
+			Password: "12345678",
+		},
+		PasswordConfirm: "1234567",
+	})
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/api/v1/passport/regist", NewBuffer(marshal))
+	R.ServeHTTP(w, req)
+
+	assert.Equal(t, 400, w.Code)
 }
 
 func TestUsernameExist(t *testing.T) {
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/passport/usernameIsExist?username=leosanqing", nil)
-	r.ServeHTTP(w, req)
+	R.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
 
@@ -70,13 +79,13 @@ func TestUsernameExist(t *testing.T) {
 }
 
 func TestLogin(t *testing.T) {
-	marshal, _ := json.Marshal(&service.PassportService{
+	marshal, _ := json.Marshal(&service.LoginRequest{
 		Username: "leosanqing",
 		Password: "123456",
 	})
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "/api/v1/passport/login", NewBuffer(marshal))
-	r.ServeHTTP(w, req)
+	R.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
 
@@ -92,7 +101,7 @@ func TestLogout(t *testing.T) {
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("DELETE", "/api/v1/passport/logout", nil)
 	//cookie, err := req.Cookie("user")
-	r.ServeHTTP(w, req)
+	R.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
 
@@ -101,18 +110,4 @@ func TestLogout(t *testing.T) {
 	json.Unmarshal([]byte(w.Body.String()), &dat)
 	assert.Equal(t, "登出成功", dat["msg"])
 
-}
-
-func NewBufferString(body string) io.Reader {
-	return bytes.NewBufferString(body)
-}
-func NewBuffer(body []byte) io.Reader {
-	return bytes.NewBuffer(body)
-}
-
-func TestMain(m *testing.M) {
-	setup()
-	fmt.Println("=====begin test======")
-	code := m.Run() // 如果不加这句，只会执行Main
-	os.Exit(code)
 }

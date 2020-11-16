@@ -16,17 +16,23 @@ func TestQueryCarousel(t *testing.T) {
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/index/carousel", nil)
 	//cookie, err := req.Cookie("user")
-	r.ServeHTTP(w, req)
+	R.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
 
 	var res serializer.Response
-
 	_ = json.Unmarshal([]byte(w.Body.String()), &res)
-	//var carousels []model.Carousel
-	carousels := res.Data.([]interface{})
-	assert.Equal(t, 4, len(carousels))
+	var carousels []model.Carousel
+	_ = gconv.SliceStruct(res.Data, &carousels)
 
+	assert.Equal(t, 4, len(carousels))
+	assert.Equal(t, "c-10011", carousels[0].Id)
+	assert.Equal(t, "http://122.152.205.72:88/group1/M00/00/05/CpoxxF0ZmG-ALsPRAAEX2Gk9FUg848.png", carousels[0].ImageUrl)
+	assert.Equal(t, "nut-1004", carousels[0].ItemId)
+	for i, carousel := range carousels {
+		assert.Equal(t, 1, carousel.IsShow)
+		assert.Equal(t, 1+i, carousel.Sort)
+	}
 }
 
 func TestQueryCats(t *testing.T) {
@@ -34,17 +40,20 @@ func TestQueryCats(t *testing.T) {
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/index/cats", nil)
 	//cookie, err := req.Cookie("user")
-	r.ServeHTTP(w, req)
+	R.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
 
 	var res serializer.Response
-
 	_ = json.Unmarshal([]byte(w.Body.String()), &res)
-	//var carousels []model.Carousel
-	cats := res.Data.([]interface{})
-	assert.Equal(t, 10, len(cats))
+	var cats []model.Category
+	_ = gconv.SliceStruct(res.Data, &cats)
 
+	assert.Equal(t, 10, len(cats))
+	for _, cat := range cats {
+		assert.Equal(t, 0, cat.FatherId)
+		assert.Equal(t, 1, cat.Type)
+	}
 }
 
 func TestQuerySubCats(t *testing.T) {
@@ -52,7 +61,7 @@ func TestQuerySubCats(t *testing.T) {
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/index/subCat/1", nil)
 	//cookie, err := req.Cookie("user")
-	r.ServeHTTP(w, req)
+	R.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
 
@@ -89,12 +98,11 @@ func TestSixNewItems(t *testing.T) {
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/index/sixNewItems/1", nil)
 	//cookie, err := req.Cookie("user")
-	r.ServeHTTP(w, req)
+	R.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
 
 	var res serializer.Response
-
 	var sixItems []model.NewItemsVO
 	_ = json.Unmarshal([]byte(w.Body.String()), &res)
 	_ = gconv.SliceStruct(res.Data, &sixItems)
@@ -108,5 +116,4 @@ func TestSixNewItems(t *testing.T) {
 	assert.Equal(t, "cake-1005", sixItems[0].SimpleItemList[0].ItemId)
 	assert.Equal(t, "【天天吃货】进口美食凤梨酥", sixItems[0].SimpleItemList[0].ItemName)
 	assert.Equal(t, "http://122.152.205.72:88/foodie/cake-1005/img1.png", sixItems[0].SimpleItemList[0].ItemUrl)
-
 }
