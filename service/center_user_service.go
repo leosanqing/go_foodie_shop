@@ -1,7 +1,7 @@
 package service
 
 import (
-	"fmt"
+	"github.com/gin-gonic/gin"
 	"go-foodie-shop/model"
 	"time"
 )
@@ -33,7 +33,7 @@ func (service *QueryUserInfoRequest) QueryUserInfo() (model.Users, error) {
 	return user, err
 }
 
-func (service *UpdateUserInfoRequest) UpdateUserInfo() (model.Users, error) {
+func (service *UpdateUserInfoRequest) UpdateUserInfo(c *gin.Context) (model.Users, error) {
 	var user = model.Users{
 		Id:          service.UserId,
 		Username:    service.Username,
@@ -47,7 +47,11 @@ func (service *UpdateUserInfoRequest) UpdateUserInfo() (model.Users, error) {
 		UpdatedTime: time.Now(),
 	}
 
-	var user2 = model.Users{Email: "asdfasdf"}
-	fmt.Println(user2)
-	return user, model.DB.Model(&user).Update(&user).Error
+	// TODO 增加令牌，整合redis
+	err := model.DB.Model(&user).Update(&user).Error
+	if err != nil {
+		setCookie(c, &user)
+	}
+
+	return user, err
 }
