@@ -84,6 +84,12 @@ func NewRouter() *gin.Engine {
 			userInfo.POST("update", c.UpdateUserInfo)
 			userInfo.POST("uploadFace", c.UploadFace)
 		}
+
+		myComments := v1.Group("mycomment")
+		{
+			myComments.POST("pending", c.Pending)
+			//myComments.POST("uploadFace", c.UploadFace)
+		}
 		//search := v1.Group("search")
 
 		v1.GET("ping", api.Ping)
