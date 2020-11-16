@@ -61,3 +61,33 @@ func UpdateUserInfo(c *gin.Context) {
 		c.JSON(400, api.ErrorResponse(err))
 	}
 }
+
+func UploadFace(c *gin.Context) {
+	var uploadFaceRequest = service.UploadFaceRequest{}
+	if err := c.ShouldBind(&uploadFaceRequest); err == nil {
+		userId := c.Query("userId")
+		if "" == userId {
+			c.JSON(400, api.ErrorResponse(errors.New("userId 不能为空")))
+			return
+		}
+
+		uploadFaceRequest.UserId = userId
+		userInfo, err := uploadFaceRequest.UploadFace(c)
+		if err != nil {
+			log.ServiceLog.Error(
+				"用户上传头像失败",
+				zap.Any("userId", uploadFaceRequest.UserId),
+				zap.Error(err),
+			)
+			c.JSON(200, api.ErrorResponse(errors.New("上传头像失败")))
+			return
+		}
+		log.ServiceLog.Info("用户上传头像成功", zap.Any("userInfo", userInfo))
+		c.JSON(200, serializer.Response{
+			Status: 200,
+			Data:   userInfo,
+		})
+	} else {
+		c.JSON(400, api.ErrorResponse(err))
+	}
+}
