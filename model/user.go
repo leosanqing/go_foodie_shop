@@ -17,7 +17,7 @@ type Users struct {
 	Mobile      string     `json:"mobile"`
 	Email       string     `json:"email"`
 	Sex         int        `json:"sex"`
-	Birthday    *LocalDate `gorm:"not null" json:"birthday"`
+	Birthday    *LocalDate `json:"birthday"`
 	CreatedTime time.Time  `json:"createdTime"`
 	UpdatedTime time.Time  `json:"updatedTime"`
 }
