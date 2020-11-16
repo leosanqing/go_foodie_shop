@@ -166,6 +166,7 @@ func (service *RegisterRequest) Register(c *gin.Context) serializer.Response {
 		return serializer.ParamErr("注册失败", err)
 	}
 
+	// TODO 整合Redis
 	setCookie(c, &user)
 	return serializer.Response{Status: 200}
 }
