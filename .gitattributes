@@ -1,1 +1,2 @@
-*.html linguist-language=go
+*.html linguist-language=Go
+*.sql linguist-language=Go

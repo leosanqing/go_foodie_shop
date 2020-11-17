@@ -88,7 +88,7 @@ func NewRouter() *gin.Engine {
 		myComments := v1.Group("mycomment")
 		{
 			myComments.POST("pending", c.Pending)
-			//myComments.POST("uploadFace", c.UploadFace)
+			myComments.GET("query", c.QueryMyComment)
 		}
 		//search := v1.Group("search")
 
