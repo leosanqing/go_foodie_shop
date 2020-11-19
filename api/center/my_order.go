@@ -28,3 +28,24 @@ func QueryMyOrders(c *gin.Context) {
 		c.JSON(400, api.ErrorResponse(err))
 	}
 }
+
+// QueryTrend 查询用户订单数
+func QueryTrend(c *gin.Context) {
+	var queryTrendRequest = service.QueryTrendRequest{}
+	if err := c.ShouldBind(&queryTrendRequest); err == nil {
+		myOrders, count, err := queryTrendRequest.QueryMyOrderTrend()
+		result := util.PagedGridResult(myOrders, count, queryTrendRequest.Page.Page, queryTrendRequest.PageSize)
+
+		if err != nil {
+			c.JSON(200, api.ErrorResponse(err))
+			return
+		}
+
+		c.JSON(200, serializer.Response{
+			Status: 200,
+			Data:   result,
+		})
+	} else {
+		c.JSON(400, api.ErrorResponse(err))
+	}
+}

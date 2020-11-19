@@ -18,10 +18,14 @@ const (
 	Close
 )
 
-type QueryMyOrderRequest struct {
-	UserId      string      `form:"userId" json:"userId" binding:"required,max=30"`
-	OrderStatus OrderStatus `form:"orderStatus" json:"orderStatus" binding:"oneof=0 10 20 30 40 50"`
+type QueryTrendRequest struct {
+	UserId string `form:"userId" json:"userId" binding:"required,max=30"`
 	model.Page
+}
+
+type QueryMyOrderRequest struct {
+	QueryTrendRequest
+	OrderStatus OrderStatus `form:"orderStatus" json:"orderStatus" binding:"oneof=0 10 20 30 40 50"`
 }
 
 func (r *QueryMyOrderRequest) QueryMyOrders() ([]model.MyOrderVO, int64, error) {
@@ -68,6 +72,7 @@ func (r *QueryMyOrderRequest) QueryMyOrders() ([]model.MyOrderVO, int64, error) 
 	if len(myOrderVOS) == 0 {
 		return nil, count, nil
 	}
+
 	for i := 0; i < len(myOrderVOS); i++ {
 		items := queryOrderItems(myOrderVOS[i].OrderId)
 		myOrderVOS[i].SubOrderItemList = items
@@ -82,4 +87,33 @@ func queryOrderItems(orderId string) []model.MySubOrderItemVO {
 		Where("order_id = ?", orderId).
 		Find(&orderSubItem)
 	return orderSubItem
+}
+
+func (r *QueryTrendRequest) QueryMyOrderTrend() ([]model.OrderStatus, int64, error) {
+	var orderStatus []model.OrderStatus
+	db := model.DB.
+		Table("orders o").
+		Select("os.order_id as order_id,\n"+
+			"os.order_status as order_status,\n"+
+			"os.created_time as created_time,\n"+
+			"os.pay_time as pay_time,\n"+
+			"os.deliver_time as deliver_time,\n"+
+			"os.success_time as success_time,\n"+
+			"os.close_time as close_time,\n"+
+			"os.comment_time as comment_time").
+		Joins("LEFT JOIN order_status os on o.id = os.order_id").
+		Where("o.is_delete = 0 \n"+
+			"AND o.user_id = ? \n"+
+			"AND os.order_status in (20, 30, 40)", r.UserId).
+		Order("os.order_id DESC")
+
+	var count int64
+	if err := db.Count(&count).Error; err != nil {
+		return nil, 0, err
+	}
+
+	err := db.Scopes(util.Paginate(r.Page.Page, r.PageSize)).
+		Find(&orderStatus).
+		Error
+	return orderStatus, count, err
 }
