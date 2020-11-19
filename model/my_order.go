@@ -2,6 +2,7 @@ package model
 
 import "time"
 
+// 我的订单展示对象
 type MyOrderVO struct {
 	OrderId          string             `json:"orderId"`
 	CreatedTime      time.Time          `json:"createdTime"`

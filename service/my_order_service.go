@@ -34,15 +34,8 @@ func (r *QueryMyOrderRequest) QueryMyOrders() ([]model.MyOrderVO, int64, error) 
 			"od.real_pay_amount as real_pay_amount,\n"+
 			"od.post_amount as post_amount,\n"+
 			"os.order_status as order_status,\n"+
-			"oi.item_id as item_id,\n"+
-			"oi.item_name as item_name,\n"+
-			"oi.item_img as item_img,\n"+
-			"oi.item_spec_name as item_spec_name,\n"+
-			"oi.buy_counts as buy_counts,\n"+
-			"oi.price as price,\n"+
 			"od.is_comment as is_comment").
 		Joins("LEFT JOIN order_status os ON od.id = os.order_id").
-		Joins("LEFT JOIN order_items oi ON od.id = oi.order_id").
 		Where("od.user_id = ?", r.UserId).
 		Where("od.is_delete = 0").
 		Order("od.updated_time ASC")
@@ -72,5 +65,21 @@ func (r *QueryMyOrderRequest) QueryMyOrders() ([]model.MyOrderVO, int64, error) 
 		return nil, 0, errors.New("查询我的订单失败")
 	}
 
+	if len(myOrderVOS) == 0 {
+		return nil, count, nil
+	}
+	for i := 0; i < len(myOrderVOS); i++ {
+		items := queryOrderItems(myOrderVOS[i].OrderId)
+		myOrderVOS[i].SubOrderItemList = items
+	}
 	return myOrderVOS, count, nil
+}
+
+func queryOrderItems(orderId string) []model.MySubOrderItemVO {
+	var orderSubItem []model.MySubOrderItemVO
+	model.DB.
+		Table("order_items").
+		Where("order_id = ?", orderId).
+		Find(&orderSubItem)
+	return orderSubItem
 }

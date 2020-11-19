@@ -91,7 +91,7 @@ func NewRouter() *gin.Engine {
 			myComments.GET("query", c.QueryMyComment)
 			myComments.POST("saveList", c.SaveCommentList)
 		}
-		myOrders := v1.Group("myorders")
+		myOrders := v1.Group("my_orders")
 		{
 			myOrders.GET("query", c.QueryMyOrders)
 		}
