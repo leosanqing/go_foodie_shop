@@ -49,3 +49,22 @@ func QueryTrend(c *gin.Context) {
 		c.JSON(400, api.ErrorResponse(err))
 	}
 }
+
+// StatusCounts 查询用户订单数
+func StatusCounts(c *gin.Context) {
+	var queryTrendRequest = service.QueryStatusCountsRequest{}
+	if err := c.ShouldBind(&queryTrendRequest); err == nil {
+		myOrders, err := queryTrendRequest.QueryOrderStatus()
+		if err != nil {
+			c.JSON(200, api.ErrorResponse(err))
+			return
+		}
+
+		c.JSON(200, serializer.Response{
+			Status: 200,
+			Data:   myOrders,
+		})
+	} else {
+		c.JSON(400, api.ErrorResponse(err))
+	}
+}

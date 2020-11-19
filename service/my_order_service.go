@@ -18,6 +18,14 @@ const (
 	Close
 )
 
+type IsComment int
+
+const (
+	NoValue IsComment = -1 + iota
+	No
+	Yes
+)
+
 type QueryTrendRequest struct {
 	UserId string `form:"userId" json:"userId" binding:"required,max=30"`
 	model.Page
@@ -26,6 +34,10 @@ type QueryTrendRequest struct {
 type QueryMyOrderRequest struct {
 	QueryTrendRequest
 	OrderStatus OrderStatus `form:"orderStatus" json:"orderStatus" binding:"oneof=0 10 20 30 40 50"`
+}
+
+type QueryStatusCountsRequest struct {
+	UserId string `form:"userId" json:"userId" binding:"required,max=30"`
 }
 
 func (r *QueryMyOrderRequest) QueryMyOrders() ([]model.MyOrderVO, int64, error) {
@@ -116,4 +128,64 @@ func (r *QueryTrendRequest) QueryMyOrderTrend() ([]model.OrderStatus, int64, err
 		Find(&orderStatus).
 		Error
 	return orderStatus, count, err
+}
+
+func (r *QueryStatusCountsRequest) QueryOrderStatus() (model.OrderStatusCountsVO, error) {
+	var orderStatus model.OrderStatusCountsVO
+	waitPayCount, err := queryOrderStatusCount(r.UserId, int(WaitPay), NoValue)
+	if err != nil {
+		return orderStatus, err
+	}
+
+	waitDeliverCount, err := queryOrderStatusCount(r.UserId, int(WaitDeliver), NoValue)
+	if err != nil {
+		return orderStatus, err
+	}
+
+	waitReceiverCount, err := queryOrderStatusCount(r.UserId, int(WaitReceiver), NoValue)
+	if err != nil {
+		return orderStatus, err
+	}
+
+	waitCommentCount, err := queryOrderStatusCount(r.UserId, int(Success), No)
+	if err != nil {
+		return orderStatus, err
+	}
+
+	orderStatus.WaitPayCounts = waitPayCount
+	orderStatus.WaitDeliverCounts = waitDeliverCount
+	orderStatus.WaitReceiveCounts = waitReceiverCount
+	orderStatus.WaitCommentCounts = waitCommentCount
+
+	return orderStatus, err
+}
+
+func queryOrderStatusCount(userId string, orderStatus int, isComment IsComment) (int64, error) {
+	var count int64
+	db := model.DB.
+		Table("orders o").
+		Joins("LEFT JOIN order_status os on o.id = os.order_id").
+		Where("o.is_delete = 0 \n"+
+			"AND o.user_id = ? \n"+
+			"AND os.order_status = ?", userId, orderStatus)
+	if isComment != NoValue && (isComment == No || isComment == Yes) {
+		db.Where("o.is_comment = ?", isComment)
+	}
+
+	if err := db.Count(&count).Error; err != nil {
+		log.ServiceLog.Error(
+			"查询用户订单状态统计失败",
+			zap.String("userId", userId),
+			zap.Int("orderStatus", orderStatus),
+			zap.Error(err),
+		)
+		return 0, errors.New("查询用户订单状态统计失败")
+	}
+
+	log.ServiceLog.Info(
+		"查询用户订单状态统计成功",
+		zap.String("userId", userId),
+		zap.Int("orderStatus", orderStatus),
+	)
+	return count, nil
 }
