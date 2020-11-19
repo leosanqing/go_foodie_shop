@@ -95,6 +95,7 @@ func NewRouter() *gin.Engine {
 		{
 			myOrders.GET("query", c.QueryMyOrders)
 			myOrders.GET("trend", c.QueryTrend)
+			myOrders.GET("status_counts", c.StatusCounts)
 		}
 
 		//search := v1.Group("search")

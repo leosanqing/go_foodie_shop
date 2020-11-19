@@ -22,3 +22,10 @@ type MySubOrderItemVO struct {
 	BuyCounts    int    `json:"buyCounts"`
 	Price        int    `json:"price"`
 }
+
+type OrderStatusCountsVO struct {
+	WaitPayCounts     int64 `json:"waitPayCounts"`
+	WaitDeliverCounts int64 `json:"waitDeliverCounts"`
+	WaitReceiveCounts int64 `json:"waitReceiveCounts"`
+	WaitCommentCounts int64 `json:"waitCommentCounts"`
+}
