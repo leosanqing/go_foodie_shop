@@ -126,8 +126,9 @@ func (r *SaveCommentRequest) SaveMyComment() error {
 			return errors.New("修改订单失败")
 		}
 
+		localTime := model.LocalTime(time.Now())
 		// 3. 修改订单状态的  commentTime
-		orderStatus := model.OrderStatus{OrderId: r.OrderId, CommentTime: time.Now()}
+		orderStatus := model.OrderStatus{OrderId: r.OrderId, CommentTime: &localTime}
 		if err := db.Model(&model.OrderStatus{}).Update(&orderStatus).Error; err != nil {
 			log.ServiceLog.Error(
 				"修改订单状态失败",

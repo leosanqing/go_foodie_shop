@@ -53,3 +53,24 @@ func TestQueryMyOrder(t *testing.T) {
 	assert.Equal(t, 1, vo.BuyCounts)
 	assert.Equal(t, 14240, vo.Price)
 }
+
+func TestQueryTrend(t *testing.T) {
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/api/v1/my_orders/trend?userId=19120779W7TK6800&page=1&pageSize=3", nil)
+	//cookie, err := req.Cookie("user")
+	R.ServeHTTP(w, req)
+
+	assert.Equal(t, 200, w.Code)
+
+	var res serializer.Response
+	_ = json.Unmarshal([]byte(w.Body.String()), &res)
+	var result util.PageResult
+	_ = gconv.Struct(res.Data, &result)
+
+	// fixme 字符串转指针对象问题
+	//var orderStatuses []model.OrderStatus
+	//err := gconv.SliceStruct(result.Rows, &orderStatuses)
+	//fmt.Println(err)
+
+}
