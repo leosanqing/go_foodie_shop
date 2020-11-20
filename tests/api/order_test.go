@@ -23,7 +23,7 @@ func TestQueryMyOrder(t *testing.T) {
 	assert.Equal(t, 200, w.Code)
 
 	var res serializer.Response
-	_ = json.Unmarshal([]byte(w.Body.String()), &res)
+	_ = json.Unmarshal(w.Body.Bytes(), &res)
 	var result util.PageResult
 	_ = gconv.Struct(res.Data, &result)
 
@@ -64,9 +64,40 @@ func TestQueryTrend(t *testing.T) {
 	assert.Equal(t, 200, w.Code)
 
 	var res serializer.Response
-	_ = json.Unmarshal([]byte(w.Body.String()), &res)
+	_ = json.Unmarshal(w.Body.Bytes(), &res)
 	var result util.PageResult
 	_ = gconv.Struct(res.Data, &result)
+
+	// fixme 字符串转指针对象问题
+	//var orderStatuses []model.OrderStatus
+	//err := gconv.SliceStruct(result.Rows, &orderStatuses)
+	//fmt.Println(err)
+
+}
+
+func TestDeliver(t *testing.T) {
+	orderStatus := model.OrderStatus{
+		OrderId: "190830BW77HM55KP",
+	}
+	_ = model.DB.First(&orderStatus)
+	assert.Equal(t, "190830BW77HM55KP", orderStatus.OrderId)
+	assert.Equal(t, 20, orderStatus.OrderStatus)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/api/v1/my_orders/deliver?orderId=190830BW77HM55KP", nil)
+	//cookie, err := req.Cookie("user")
+
+	R.ServeHTTP(w, req)
+
+	assert.Equal(t, 200, w.Code)
+
+	// 再次查询验证是否更新
+	_ = model.DB.First(&orderStatus)
+	assert.Equal(t, "190830BW77HM55KP", orderStatus.OrderId)
+	assert.Equal(t, 30, orderStatus.OrderStatus)
+	assert.NotEmpty(t, orderStatus.DeliverTime)
+
+	model.DB.Model(&model.OrderStatus{}).Where(&orderStatus).Update(&model.OrderStatus{OrderStatus: 20, DeliverTime: nil})
 
 	// fixme 字符串转指针对象问题
 	//var orderStatuses []model.OrderStatus

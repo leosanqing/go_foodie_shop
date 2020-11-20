@@ -23,7 +23,7 @@ func TestSearchItem_sortByDefault(t *testing.T) {
 
 	var res serializer.Response
 	var pageResult util.PageResult
-	_ = json.Unmarshal([]byte(w.Body.String()), &res)
+	_ = json.Unmarshal(w.Body.Bytes(), &res)
 	_ = gconv.Struct(res.Data, &pageResult)
 
 	var itemsVOS []model.SearchItemsVO
@@ -53,7 +53,7 @@ func TestSearchItem_sortByCounts(t *testing.T) {
 
 	var res serializer.Response
 	var pageResult util.PageResult
-	_ = json.Unmarshal([]byte(w.Body.String()), &res)
+	_ = json.Unmarshal(w.Body.Bytes(), &res)
 	_ = gconv.Struct(res.Data, &pageResult)
 
 	var itemsVOS []model.SearchItemsVO
@@ -84,7 +84,7 @@ func TestSearchItem_sortByPrice(t *testing.T) {
 
 	var res serializer.Response
 	var pageResult util.PageResult
-	_ = json.Unmarshal([]byte(w.Body.String()), &res)
+	_ = json.Unmarshal(w.Body.Bytes(), &res)
 	_ = gconv.Struct(res.Data, &pageResult)
 
 	var itemsVOS []model.SearchItemsVO
@@ -115,7 +115,7 @@ func TestSearchItem_byCatId_sortByDefault(t *testing.T) {
 
 	var res serializer.Response
 	var pageResult util.PageResult
-	_ = json.Unmarshal([]byte(w.Body.String()), &res)
+	_ = json.Unmarshal(w.Body.Bytes(), &res)
 	_ = gconv.Struct(res.Data, &pageResult)
 
 	var itemsVOS []model.SearchItemsVO
@@ -142,7 +142,7 @@ func TestSearchItem_byCatId_sortByCounts(t *testing.T) {
 
 	var res serializer.Response
 	var pageResult util.PageResult
-	_ = json.Unmarshal([]byte(w.Body.String()), &res)
+	_ = json.Unmarshal(w.Body.Bytes(), &res)
 	_ = gconv.Struct(res.Data, &pageResult)
 
 	var itemsVOS []model.SearchItemsVO
@@ -172,7 +172,7 @@ func TestSearchItem_byCatId_sortByPrice(t *testing.T) {
 
 	var res serializer.Response
 	var pageResult util.PageResult
-	_ = json.Unmarshal([]byte(w.Body.String()), &res)
+	_ = json.Unmarshal(w.Body.Bytes(), &res)
 	_ = gconv.Struct(res.Data, &pageResult)
 
 	var itemsVOS []model.SearchItemsVO

@@ -68,3 +68,21 @@ func StatusCounts(c *gin.Context) {
 		c.JSON(400, api.ErrorResponse(err))
 	}
 }
+
+// deliver 商家发货
+func Deliver(c *gin.Context) {
+	var deliverRequest = service.DeliverRequest{}
+	if err := c.ShouldBindQuery(&deliverRequest); err == nil {
+		err := deliverRequest.UpdateDeliverOrderStatus()
+		if err != nil {
+			c.JSON(200, api.ErrorResponse(err))
+			return
+		}
+
+		c.JSON(200, serializer.Response{
+			Status: 200,
+		})
+	} else {
+		c.JSON(400, api.ErrorResponse(err))
+	}
+}

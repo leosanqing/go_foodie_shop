@@ -20,7 +20,7 @@ func TestPingRoute(t *testing.T) {
 	assert.Equal(t, 200, w.Code)
 	var dat map[string]interface{}
 
-	_ = json.Unmarshal([]byte(w.Body.String()), &dat)
+	_ = json.Unmarshal(w.Body.Bytes(), &dat)
 	assert.Equal(t, "Pong", dat["msg"])
 }
 
@@ -73,7 +73,7 @@ func TestUsernameExist(t *testing.T) {
 
 	var dat map[string]interface{}
 
-	_ = json.Unmarshal([]byte(w.Body.String()), &dat)
+	_ = json.Unmarshal(w.Body.Bytes(), &dat)
 	assert.Equal(t, "用户名已经注册", dat["msg"])
 
 }
@@ -91,7 +91,7 @@ func TestLogin(t *testing.T) {
 
 	var dat map[string]interface{}
 
-	_ = json.Unmarshal([]byte(w.Body.String()), &dat)
+	_ = json.Unmarshal(w.Body.Bytes(), &dat)
 	assert.Equal(t, "登录成功", dat["msg"])
 
 }
@@ -107,7 +107,7 @@ func TestLogout(t *testing.T) {
 
 	var dat map[string]interface{}
 
-	_ = json.Unmarshal([]byte(w.Body.String()), &dat)
+	_ = json.Unmarshal(w.Body.Bytes(), &dat)
 	assert.Equal(t, "登出成功", dat["msg"])
 
 }

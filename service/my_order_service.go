@@ -6,6 +6,7 @@ import (
 	"go-foodie-shop/model"
 	"go-foodie-shop/util"
 	"go.uber.org/zap"
+	"time"
 )
 
 type OrderStatus int
@@ -38,6 +39,10 @@ type QueryMyOrderRequest struct {
 
 type QueryStatusCountsRequest struct {
 	UserId string `form:"userId" json:"userId" binding:"required,max=30"`
+}
+
+type DeliverRequest struct {
+	OrderId string `form:"orderId" json:"orderId" binding:"required,max=30"`
 }
 
 func (r *QueryMyOrderRequest) QueryMyOrders() ([]model.MyOrderVO, int64, error) {
@@ -188,4 +193,33 @@ func queryOrderStatusCount(userId string, orderStatus int, isComment IsComment) 
 		zap.Int("orderStatus", orderStatus),
 	)
 	return count, nil
+}
+
+func (r *DeliverRequest) UpdateDeliverOrderStatus() error {
+	now := model.LocalTime(time.Now())
+
+	orderStatus := model.OrderStatus{
+		OrderStatus: int(WaitReceiver),
+		DeliverTime: &now,
+	}
+	err := model.DB.
+		Model(&model.OrderStatus{}).
+		Where(&model.OrderStatus{OrderId: r.OrderId, OrderStatus: int(WaitDeliver)}).
+		Update(&orderStatus).
+		Error
+
+	if err != nil {
+		log.ServiceLog.Error(
+			"发货异常",
+			zap.String("orderId", r.OrderId),
+			zap.Error(err),
+		)
+		return errors.New("发货异常")
+	}
+
+	log.ServiceLog.Info(
+		"发货成功",
+		zap.String("orderId", r.OrderId),
+	)
+	return nil
 }

@@ -22,7 +22,7 @@ func TestQueryPending(t *testing.T) {
 	assert.Equal(t, 200, w.Code)
 
 	var res serializer.Response
-	_ = json.Unmarshal([]byte(w.Body.String()), &res)
+	_ = json.Unmarshal(w.Body.Bytes(), &res)
 	var orderItems []model.OrderItems
 	_ = gconv.SliceStruct(res.Data, &orderItems)
 
@@ -53,7 +53,7 @@ func TestQueryMyComment(t *testing.T) {
 	assert.Equal(t, 200, w.Code)
 
 	var res serializer.Response
-	_ = json.Unmarshal([]byte(w.Body.String()), &res)
+	_ = json.Unmarshal(w.Body.Bytes(), &res)
 	var result util.PageResult
 	_ = gconv.Struct(res.Data, &result)
 

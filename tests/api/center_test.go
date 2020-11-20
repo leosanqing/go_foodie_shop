@@ -24,7 +24,7 @@ func TestQueryUserInfo(t *testing.T) {
 	assert.Equal(t, 200, w.Code)
 
 	var res serializer.Response
-	_ = json.Unmarshal([]byte(w.Body.String()), &res)
+	_ = json.Unmarshal(w.Body.Bytes(), &res)
 	var users model.Users
 	err := gconv.Struct(res.Data, &users)
 	fmt.Println(err)
@@ -55,7 +55,7 @@ func TestUpdateUserInfo(t *testing.T) {
 	assert.Equal(t, 200, w.Code)
 
 	var res serializer.Response
-	_ = json.Unmarshal([]byte(w.Body.String()), &res)
+	_ = json.Unmarshal(w.Body.Bytes(), &res)
 	var users model.Users
 	err := gconv.Struct(res.Data, &users)
 	fmt.Println(err)
@@ -87,7 +87,7 @@ func TestUploadFace(t *testing.T) {
 	assert.Equal(t, 200, w.Code)
 
 	var res serializer.Response
-	_ = json.Unmarshal([]byte(w.Body.String()), &res)
+	_ = json.Unmarshal(w.Body.Bytes(), &res)
 	var users model.Users
 	err := gconv.Struct(res.Data, &users)
 	fmt.Println(err)
