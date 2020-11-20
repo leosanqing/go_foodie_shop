@@ -45,6 +45,11 @@ type DeliverRequest struct {
 	OrderId string `form:"orderId" json:"orderId" binding:"required,max=30"`
 }
 
+type ConfirmReceiverRequest struct {
+	UserId  string `form:"userId" json:"userId" binding:"required,max=30"`
+	OrderId string `form:"orderId" json:"orderId" binding:"required,max=30"`
+}
+
 func (r *QueryMyOrderRequest) QueryMyOrders() ([]model.MyOrderVO, int64, error) {
 	var myOrderVOS []model.MyOrderVO
 	db := model.DB.
@@ -220,6 +225,54 @@ func (r *DeliverRequest) UpdateDeliverOrderStatus() error {
 	log.ServiceLog.Info(
 		"发货成功",
 		zap.String("orderId", r.OrderId),
+	)
+	return nil
+}
+
+func (r *ConfirmReceiverRequest) ConfirmReceiver() error {
+	// 确认 orderId 与 userId 是否正确
+	order := model.Orders{
+		Id:       r.OrderId,
+		UserId:   r.UserId,
+		IsDelete: 0,
+	}
+	err := model.DB.First(&order).Error
+	if err != nil {
+		log.ServiceLog.Error(
+			"查询订单失败",
+			zap.String("orderId", r.OrderId),
+			zap.String("userId", r.UserId),
+			zap.Error(err),
+		)
+		return errors.New("查询订单失败")
+	}
+
+	now := model.LocalTime(time.Now())
+
+	orderStatus := model.OrderStatus{
+		OrderStatus: int(Success),
+		SuccessTime: &now,
+	}
+	err = model.DB.
+		Model(&model.OrderStatus{}).
+		Where(&model.OrderStatus{OrderId: r.OrderId, OrderStatus: int(WaitReceiver)}).
+		Update(&orderStatus).
+		Error
+
+	if err != nil {
+		log.ServiceLog.Error(
+			"确认收货失败",
+			zap.String("orderId", r.OrderId),
+			zap.String("userId", r.UserId),
+			zap.Error(err),
+		)
+		return errors.New("确认收货失败")
+	}
+	log.ServiceLog.Error(
+		"确认收货成功",
+		zap.String("orderId", r.OrderId),
+		zap.String("userId", r.UserId),
+		zap.Error(err),
 	)
 	return nil
 }
