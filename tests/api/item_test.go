@@ -23,7 +23,7 @@ func TestItemInfo(t *testing.T) {
 
 	var res serializer.Response
 	var infoVO model.ItemInfoVO
-	_ = json.Unmarshal([]byte(w.Body.String()), &res)
+	_ = json.Unmarshal(w.Body.Bytes(), &res)
 	_ = gconv.Struct(res.Data, &infoVO)
 
 	assert.Equal(t, "bingan-1001", infoVO.Item.Id)
@@ -57,7 +57,7 @@ func TestCommentCounts(t *testing.T) {
 
 	var res serializer.Response
 	var commentLevelCountsVO model.CommentLevelCountsVO
-	_ = json.Unmarshal([]byte(w.Body.String()), &res)
+	_ = json.Unmarshal(w.Body.Bytes(), &res)
 	_ = gconv.Struct(res.Data, &commentLevelCountsVO)
 
 	assert.Equal(t, int64(23), commentLevelCountsVO.TotalCounts)
@@ -77,7 +77,7 @@ func TestQueryComments_withoutLevel(t *testing.T) {
 
 	var res serializer.Response
 	var pageResult util.PageResult
-	_ = json.Unmarshal([]byte(w.Body.String()), &res)
+	_ = json.Unmarshal(w.Body.Bytes(), &res)
 	_ = gconv.Struct(res.Data, &pageResult)
 
 	var commentsVO []model.ItemCommentVO
@@ -102,7 +102,7 @@ func TestQueryComments_withLevel(t *testing.T) {
 
 	var res serializer.Response
 	var pageResult util.PageResult
-	_ = json.Unmarshal([]byte(w.Body.String()), &res)
+	_ = json.Unmarshal(w.Body.Bytes(), &res)
 	_ = gconv.Struct(res.Data, &pageResult)
 
 	var commentsVO []model.ItemCommentVO
@@ -131,7 +131,7 @@ func TestQueryItemsBySpecIds_single(t *testing.T) {
 
 	var res serializer.Response
 	var shopCartVOS []model.ShopCartVO
-	_ = json.Unmarshal([]byte(w.Body.String()), &res)
+	_ = json.Unmarshal(w.Body.Bytes(), &res)
 	_ = gconv.SliceStruct(res.Data, &shopCartVOS)
 
 	assert.Equal(t, 1, len(shopCartVOS))
@@ -155,7 +155,7 @@ func TestQueryItemsBySpecIds_moreThanOne(t *testing.T) {
 
 	var res serializer.Response
 	var shopCartVOS []model.ShopCartVO
-	_ = json.Unmarshal([]byte(w.Body.String()), &res)
+	_ = json.Unmarshal(w.Body.Bytes(), &res)
 	_ = gconv.SliceStruct(res.Data, &shopCartVOS)
 
 	assert.Equal(t, 3, len(shopCartVOS))
