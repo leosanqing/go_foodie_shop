@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"go-foodie-shop/api"
 	"go-foodie-shop/middleware/log"
+	"go-foodie-shop/model"
 	"go-foodie-shop/serializer"
 	"go-foodie-shop/service"
 	"go-foodie-shop/util"
@@ -14,7 +15,7 @@ import (
 // Pending 查询我的订单动态
 func Pending(c *gin.Context) {
 	var orderRequest = service.QueryOrderRequest{}
-	if err := c.ShouldBind(&orderRequest); err == nil {
+	if err := c.ShouldBindQuery(&orderRequest); err == nil {
 		orderItems, err := orderRequest.QueryMyOrder()
 		if err != nil {
 			log.ServiceLog.Error(
@@ -57,6 +58,35 @@ func QueryMyComment(c *gin.Context) {
 		c.JSON(200, serializer.Response{
 			Status: 200,
 			Data:   result,
+		})
+	} else {
+		c.JSON(400, api.ErrorResponse(err))
+	}
+}
+
+// SaveCommentList 保存我的评价
+func SaveCommentList(c *gin.Context) {
+	var itemsComments []model.OrderItemsComment
+	if err := c.ShouldBindJSON(&itemsComments); err == nil {
+		orderId := c.Query("orderId")
+		if "" == orderId {
+			c.JSON(400, api.ErrorResponse(errors.New("orderId 为空")))
+			return
+		}
+		userId := c.Query("userId")
+		if "" == orderId {
+			c.JSON(400, api.ErrorResponse(errors.New("userId 为空")))
+			return
+		}
+
+		err := service.SaveMyComment(userId, orderId, itemsComments)
+		if err != nil {
+			c.JSON(200, api.ErrorResponse(err))
+			return
+		}
+
+		c.JSON(200, serializer.Response{
+			Status: 200,
 		})
 	} else {
 		c.JSON(400, api.ErrorResponse(err))
