@@ -20,11 +20,7 @@ type QueryMyCommentRequest struct {
 	model.Page
 }
 
-type SaveCommentRequest struct {
-	UserId        string                    `form:"userId" json:"userId" binding:"max=30"`
-	OrderId       string                    `form:"orderId" json:"orderId" binding:"max=30"`
-	OrderItemList []model.OrderItemsComment `form:"orderItemList" json:"orderItemList" binding:"required"`
-}
+type SaveCommentRequest []model.OrderItemsComment
 
 func (r *QueryOrderRequest) QueryMyOrder() ([]model.OrderItems, error) {
 	order := model.Orders{
@@ -83,18 +79,18 @@ func (r *QueryMyCommentRequest) QueryMyComment() ([]model.MyCommentVO, int64, er
 }
 
 // 保存我的评论信息
-func (r *SaveCommentRequest) SaveMyComment() error {
+func SaveMyComment(userId, orderId string, orderItemsComments []model.OrderItemsComment) error {
 	// 使用事务控制逻辑
-	return model.DB.Transaction(func(db *gorm.DB) error {
+	return model.DB.Transaction(func(tx *gorm.DB) error {
 
 		// 1.保存订单评价 item_comments
 		var comments []model.ItemsComments
 		var comment model.ItemsComments
 
-		for _, value := range r.OrderItemList {
+		for _, value := range orderItemsComments {
 			id, _ := util.NextId()
 			comment.Id = id.String()
-			comment.UserId = r.UserId
+			comment.UserId = userId
 			comment.ItemId = value.ItemId
 			comment.ItemName = value.ItemName
 			comment.ItemSpecId = value.ItemSpecId
@@ -105,22 +101,35 @@ func (r *SaveCommentRequest) SaveMyComment() error {
 			comment.UpdatedTime = time.Now()
 			comments = append(comments, comment)
 		}
-		err := db.Create(&comments).Error
-		if err != nil {
-			log.ServiceLog.Error(
-				"创建评论失败",
-				zap.Any("commentList", r.OrderItemList),
-				zap.Error(err),
-			)
-			return errors.New("创建评论失败")
+		for _, itemsComments := range comments {
+			// TODO 改为批量新增，现在批量新增出错，未找到解决方法
+			err := tx.Create(&itemsComments).Error
+			if err != nil {
+				log.ServiceLog.Error(
+					"创建评论失败",
+					zap.Any("commentList", orderItemsComments),
+					zap.Error(err),
+				)
+				return errors.New("创建评论失败")
+			}
 		}
+		//err := tx.Create(&comments).Error
+
+		//if err != nil {
+		//	log.ServiceLog.Error(
+		//		"创建评论失败",
+		//		zap.Any("commentList", orderItemsComments),
+		//		zap.Error(err),
+		//	)
+		//	return errors.New("创建评论失败")
+		//}
 
 		// 2.修改订单 Orders
-		order := model.Orders{Id: r.OrderId, IsComment: 1}
-		if err := db.Model(model.Orders{}).Update(&order).Error; err != nil {
+		order := model.Orders{IsComment: 1}
+		if err := tx.Model(model.Orders{}).Where(model.Orders{Id: orderId}).Update(&order).Error; err != nil {
 			log.ServiceLog.Error(
 				"修改订单失败",
-				zap.Any("orderId", r.OrderId),
+				zap.Any("orderId", orderId),
 				zap.Error(err),
 			)
 			return errors.New("修改订单失败")
@@ -128,16 +137,16 @@ func (r *SaveCommentRequest) SaveMyComment() error {
 
 		localTime := model.LocalTime(time.Now())
 		// 3. 修改订单状态的  commentTime
-		orderStatus := model.OrderStatus{OrderId: r.OrderId, CommentTime: &localTime}
-		if err := db.Model(&model.OrderStatus{}).Update(&orderStatus).Error; err != nil {
+		orderStatus := model.OrderStatus{OrderId: orderId, CommentTime: &localTime}
+		if err := tx.Model(&model.OrderStatus{}).Update(&orderStatus).Error; err != nil {
 			log.ServiceLog.Error(
 				"修改订单状态失败",
-				zap.Any("orderId", r.OrderId),
+				zap.Any("orderId", orderId),
 				zap.Error(err),
 			)
 			return errors.New("修改订单状态失败")
 		}
-		log.ServiceLog.Info("保存订单成功", zap.Any("commentData", r.OrderItemList))
+		log.ServiceLog.Info("保存订单成功", zap.Any("commentData", orderItemsComments))
 		return nil
 	})
 

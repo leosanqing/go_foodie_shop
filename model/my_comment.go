@@ -13,7 +13,7 @@ type MyCommentVO struct {
 }
 
 type OrderItemsComment struct {
-	CommentId    string       `json:"commentId"`
+	CommentId    int          `json:"commentId"`
 	Content      string       `json:"content"`
 	ItemId       string       `json:"itemId"`
 	ItemName     string       `json:"itemName"`

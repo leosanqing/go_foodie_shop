@@ -69,11 +69,29 @@ func StatusCounts(c *gin.Context) {
 	}
 }
 
-// deliver 商家发货
+// deliver 商家发货 没有前端 只能通过接口调用
 func Deliver(c *gin.Context) {
 	var deliverRequest = service.DeliverRequest{}
 	if err := c.ShouldBindQuery(&deliverRequest); err == nil {
 		err := deliverRequest.UpdateDeliverOrderStatus()
+		if err != nil {
+			c.JSON(200, api.ErrorResponse(err))
+			return
+		}
+
+		c.JSON(200, serializer.Response{
+			Status: 200,
+		})
+	} else {
+		c.JSON(400, api.ErrorResponse(err))
+	}
+}
+
+// ConfirmReceiver 确认收货
+func ConfirmReceiver(c *gin.Context) {
+	var receiverRequest = service.ConfirmReceiverRequest{}
+	if err := c.ShouldBindQuery(&receiverRequest); err == nil {
+		err := receiverRequest.ConfirmReceiver()
 		if err != nil {
 			c.JSON(200, api.ErrorResponse(err))
 			return
