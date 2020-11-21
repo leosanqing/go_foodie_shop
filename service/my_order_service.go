@@ -231,12 +231,7 @@ func (r *DeliverRequest) UpdateDeliverOrderStatus() error {
 
 func (r *ConfirmReceiverRequest) ConfirmReceiver() error {
 	// 确认 orderId 与 userId 是否正确
-	order := model.Orders{
-		Id:       r.OrderId,
-		UserId:   r.UserId,
-		IsDelete: 0,
-	}
-	err := model.DB.First(&order).Error
+	err := validateUserOrder(r.OrderId, r.UserId)
 	if err != nil {
 		log.ServiceLog.Error(
 			"查询订单失败",
@@ -268,11 +263,63 @@ func (r *ConfirmReceiverRequest) ConfirmReceiver() error {
 		)
 		return errors.New("确认收货失败")
 	}
-	log.ServiceLog.Error(
+	log.ServiceLog.Info(
 		"确认收货成功",
 		zap.String("orderId", r.OrderId),
 		zap.String("userId", r.UserId),
 		zap.Error(err),
+	)
+	return nil
+}
+
+// validateUserOrder 验证传入的UserId 与OrderId 是否合法，防止出现恶意修改订单
+func validateUserOrder(orderId, userId string) error {
+	order := model.Orders{
+		Id:       orderId,
+		UserId:   userId,
+		IsDelete: 0,
+	}
+	return model.DB.First(&order).Error
+}
+
+func (r *ConfirmReceiverRequest) DeleteOrder() error {
+	err := validateUserOrder(r.OrderId, r.UserId)
+	if err != nil {
+		log.ServiceLog.Error(
+			"删除订单失败",
+			zap.String("orderId", r.OrderId),
+			zap.String("userId", r.UserId),
+			zap.Error(err),
+		)
+		return errors.New("删除订单失败，请确认 订单与用户ID 是否合法")
+	}
+
+	order := model.Orders{
+		Id:     r.OrderId,
+		UserId: r.UserId,
+	}
+
+	now := model.LocalTime(time.Now())
+	err = model.DB.
+		Model(&model.Orders{}).
+		Where(&order).
+		Update(&model.Orders{IsDelete: 1, UpdatedTime: &now}).
+		Error
+
+	if err != nil {
+		log.ServiceLog.Error(
+			"删除订单失败",
+			zap.String("orderId", r.OrderId),
+			zap.String("userId", r.UserId),
+			zap.Error(err),
+		)
+		return errors.New("删除订单失败")
+	}
+
+	log.ServiceLog.Info(
+		"删除订单成功",
+		zap.String("orderId", r.OrderId),
+		zap.String("userId", r.UserId),
 	)
 	return nil
 }

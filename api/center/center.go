@@ -37,7 +37,7 @@ func QueryUserInfo(c *gin.Context) {
 // UpdateUserInfo 更新用户信息
 func UpdateUserInfo(c *gin.Context) {
 	var updateUserInfoRequest = service.UpdateUserInfoRequest{}
-	if err := c.ShouldBind(&updateUserInfoRequest); err == nil {
+	if err := c.BindJSON(&updateUserInfoRequest); err == nil {
 		userId := c.Query("userId")
 		updateUserInfoRequest.UserId = userId
 
