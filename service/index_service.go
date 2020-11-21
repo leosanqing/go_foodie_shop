@@ -8,6 +8,10 @@ import (
 type IndexService struct {
 }
 
+type QueryItemByIdRequest struct {
+	RootCatId string `uri:"rootCatId" json:"rootCatId" binding:"required,max=30"`
+}
+
 func (service *IndexService) QueryCarouselList() serializer.Response {
 	var carousel []model.Carousel
 
@@ -72,7 +76,7 @@ func (service *IndexService) QueryAllRootLevelCats() serializer.Response {
 //	}
 //}
 
-func (service *IndexService) QuerySubCats(id string) serializer.Response {
+func (r *QueryItemByIdRequest) QuerySubCats() serializer.Response {
 	var catVOS []model.SubCategory
 	err := model.DB.
 		Raw(
@@ -89,7 +93,7 @@ func (service *IndexService) QuerySubCats(id string) serializer.Response {
 				"	category f\n"+
 				"LEFT JOIN\n"+
 				"	category c	on f.id = c.father_id\n"+
-				"WHERE f.father_id = ?", id).
+				"WHERE f.father_id = ?", r.RootCatId).
 		Scan(&catVOS).
 		Error
 
@@ -159,7 +163,7 @@ func handleSubCats(subCats []model.SubCategory) []model.CategoryVO {
 	return catVOS
 }
 
-func (service *IndexService) QuerySixNewItems(id string) serializer.Response {
+func (r *QueryItemByIdRequest) QuerySixNewItems() serializer.Response {
 	var newItems []model.NewItems
 	err := model.DB.
 		Raw(
@@ -182,7 +186,7 @@ func (service *IndexService) QuerySixNewItems(id string) serializer.Response {
 				"	and i.root_cat_id = ?\n"+
 				"	and ii.is_main = 1\n"+
 				"	order by i.created_time	DESC\n"+
-				"LIMIT 0,6", id).
+				"LIMIT 0,6", r.RootCatId).
 		Scan(&newItems).Error
 
 	if err != nil {
