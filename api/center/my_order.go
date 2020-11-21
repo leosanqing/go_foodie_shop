@@ -104,3 +104,21 @@ func ConfirmReceiver(c *gin.Context) {
 		c.JSON(400, api.ErrorResponse(err))
 	}
 }
+
+// DeleteOrder 删除订单
+func DeleteOrder(c *gin.Context) {
+	var receiverRequest = service.ConfirmReceiverRequest{}
+	if err := c.ShouldBindQuery(&receiverRequest); err == nil {
+		err := receiverRequest.DeleteOrder()
+		if err != nil {
+			c.JSON(200, api.ErrorResponse(err))
+			return
+		}
+
+		c.JSON(200, serializer.Response{
+			Status: 200,
+		})
+	} else {
+		c.JSON(400, api.ErrorResponse(err))
+	}
+}
