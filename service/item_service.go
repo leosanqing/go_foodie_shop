@@ -5,45 +5,46 @@ import (
 	"strings"
 )
 
-type QueryItemService struct {
+type QueryItemRequest struct {
+	ItemId string `uri:"itemId" json:"itemId" binding:"required,max=30"`
 }
 
 type QueryItemsBySpecIdsRequest struct {
 	ItemSpecIds string `form:"itemSpecIds" json:"itemSpecIds" binding:"required,min=1,max=1024"`
 }
 
-func (service *QueryItemService) QueryItemsById(id string) (model.Items, error) {
+func (r *QueryItemRequest) QueryItemsById() (model.Items, error) {
 	var item model.Items
 	err := model.DB.
-		Where("id = ?", id).
+		Where("id = ?", r.ItemId).
 		First(&item).
 		Error
 
 	return item, err
 }
 
-func (service *QueryItemService) QueryItemsImgById(id string) ([]model.ItemsImg, error) {
+func (r *QueryItemRequest) QueryItemsImgById() ([]model.ItemsImg, error) {
 	var itemImg []model.ItemsImg
 	err := model.DB.
-		Where("item_id = ?", id).
+		Where("item_id = ?", r.ItemId).
 		Find(&itemImg).
 		Error
 	return itemImg, err
 }
 
-func (service *QueryItemService) QueryItemSpec(itemId string) ([]model.ItemsSpec, error) {
+func (r *QueryItemRequest) QueryItemSpec() ([]model.ItemsSpec, error) {
 	var itemSpec []model.ItemsSpec
 	err := model.DB.
-		Where("item_id = ?", itemId).
+		Where("item_id = ?", r.ItemId).
 		Find(&itemSpec).
 		Error
 	return itemSpec, err
 }
 
-func (service *QueryItemService) QueryItemsParam(itemId string) (error, model.ItemsParam) {
+func (r *QueryItemRequest) QueryItemsParam() (error, model.ItemsParam) {
 	var itemImg model.ItemsParam
 	err := model.DB.
-		Where("item_id = ?", itemId).
+		Where("item_id = ?", r.ItemId).
 		First(&itemImg).
 		Error
 	return err, itemImg

@@ -2,7 +2,6 @@ package api
 
 import (
 	"errors"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"go-foodie-shop/middleware/log"
 	"go-foodie-shop/model"
@@ -15,19 +14,17 @@ import (
 // ItemInfo 商品详情
 func ItemInfo(c *gin.Context) {
 	var itemVO model.ItemInfoVO
-	var itemService service.QueryItemService
-	if err := c.ShouldBind(&itemService); err == nil {
-		itemId := c.Param("itemId")
-		items, err := itemService.QueryItemsById(itemId)
+	var queryItemRequest service.QueryItemRequest
+	if err := c.ShouldBindUri(&queryItemRequest); err == nil {
+		items, err := queryItemRequest.QueryItemsById()
 		if err != nil {
-			fmt.Println(items)
 			log.ServiceLog.Error("query Item by Id err id ")
 			c.JSON(200, ErrorResponse(errors.New("查询商品失败")))
 			return
 		}
 		itemVO.Item = items
 
-		itemImg, err := itemService.QueryItemsImgById(itemId)
+		itemImg, err := queryItemRequest.QueryItemsImgById()
 		if err != nil {
 			log.ServiceLog.Error("query ItemImg by Id err id ")
 			c.JSON(200, ErrorResponse(errors.New("查询商品失败")))
@@ -35,7 +32,7 @@ func ItemInfo(c *gin.Context) {
 		}
 		itemVO.ItemImgList = itemImg
 
-		specs, err := itemService.QueryItemSpec(itemId)
+		specs, err := queryItemRequest.QueryItemSpec()
 		if err != nil {
 			log.ServiceLog.Error("query itemSpec by Id err id %s")
 			c.JSON(200, ErrorResponse(errors.New("查询商品规格信息失败")))
@@ -43,11 +40,11 @@ func ItemInfo(c *gin.Context) {
 		}
 		itemVO.ItemSpecList = specs
 
-		err, itemParam := itemService.QueryItemsParam(itemId)
+		err, itemParam := queryItemRequest.QueryItemsParam()
 		if err != nil {
 			log.ServiceLog.Error(
 				"query itemParam by Id err id ",
-				zap.String("itemId", itemId),
+				zap.String("itemId", queryItemRequest.ItemId),
 				zap.Error(err),
 			)
 			c.JSON(200, ErrorResponse(errors.New("查询商品参数信息失败")))
@@ -125,11 +122,11 @@ func QueryComments(c *gin.Context) {
 
 // QueryItemsBySpecIds 刷新购物车
 func QueryItemsBySpecIds(c *gin.Context) {
-	var shopCartService service.ShopCartService
+	var shopCartService service.QueryItemsBySpecIdsRequest
 	if err := c.ShouldBind(&shopCartService); err == nil {
 		if shopCartVOS, err := shopCartService.QueryItemsBySpecIds(); err != nil {
 			log.ServiceLog.Error(
-				"查询商品评价失败",
+				"查询商品信息失败",
 				zap.String("itemSpecIds", shopCartService.ItemSpecIds),
 				zap.Error(err),
 			)
