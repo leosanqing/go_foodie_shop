@@ -27,19 +27,19 @@ func Cats(c *gin.Context) {
 
 // SubCats 查询子分类(二三级)
 func SubCats(c *gin.Context) {
-	var indexService = service.IndexService{}
-	if err := c.ShouldBind(&indexService); err == nil {
-		c.JSON(200, indexService.QuerySubCats(c.Param("rootCatId")))
+	var indexService = service.QueryItemByIdRequest{}
+	if err := c.ShouldBindUri(&indexService); err == nil {
+		c.JSON(200, indexService.QuerySubCats())
 	} else {
-		c.JSON(200, ErrorResponse(err))
+		c.JSON(400, ErrorResponse(err))
 	}
 }
 
 func GetSixNewItems(c *gin.Context) {
-	var indexService = service.IndexService{}
-	if err := c.ShouldBind(&indexService); err == nil {
-		c.JSON(200, indexService.QuerySixNewItems(c.Param("rootCatId")))
+	var indexService = service.QueryItemByIdRequest{}
+	if err := c.ShouldBindUri(&indexService); err == nil {
+		c.JSON(200, indexService.QuerySixNewItems())
 	} else {
-		c.JSON(200, ErrorResponse(err))
+		c.JSON(400, ErrorResponse(err))
 	}
 }

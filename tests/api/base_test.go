@@ -14,11 +14,9 @@ import (
 )
 
 // 链接单例
-var (
-	R *gin.Engine
-)
+var R *gin.Engine
 
-func setup() {
+func Setup() {
 	db, err := gorm.Open("mysql", "root:123456@tcp(127.0.0.1:3306)/foodie-shop-dev?charset=utf8&parseTime=True&loc=Local")
 	model.DB = db
 	if err != nil {
@@ -33,7 +31,7 @@ func setup() {
 }
 
 func TestMain(m *testing.M) {
-	setup()
+	Setup()
 	fmt.Println("=====begin test======")
 	code := m.Run() // 如果不加这句，只会执行Main
 	os.Exit(code)

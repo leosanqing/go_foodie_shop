@@ -31,7 +31,7 @@ func UserLogin(c *gin.Context) {
 		res := loginService.Login(c)
 		c.JSON(200, res)
 	} else {
-		c.JSON(200, ErrorResponse(err))
+		c.JSON(400, ErrorResponse(err))
 	}
 }
 
