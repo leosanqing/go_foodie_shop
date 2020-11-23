@@ -61,18 +61,18 @@ func (service *LoginRequest) Login(c *gin.Context) serializer.Response {
 		return serializer.ParamErr("账号或密码错误", nil)
 	}
 
-	if user.CheckPassword(service.Password) == false {
+	if !user.CheckPassword(service.Password) {
 		return serializer.ParamErr("账号或密码错误", nil)
 	}
 
-	setCookie(c, &user)
+	SetCookie(c, &user)
 	return serializer.Response{
 		Status: 200,
 		Msg:    "登录成功",
 	}
 }
 
-func setCookie(c *gin.Context, user *model.Users) {
+func SetCookie(c *gin.Context, user *model.Users) {
 	id, _ := util.NextId()
 	jsonStr, _ := json.Marshal(&model.Cookie{
 		Id:              user.Id,
@@ -167,6 +167,6 @@ func (service *RegisterRequest) Register(c *gin.Context) serializer.Response {
 	}
 
 	// TODO 整合Redis
-	setCookie(c, &user)
+	SetCookie(c, &user)
 	return serializer.Response{Status: 200}
 }
