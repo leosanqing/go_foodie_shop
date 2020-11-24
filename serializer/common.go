@@ -30,7 +30,7 @@ const (
 	// CodeEncryptError 加密失败
 	CodeEncryptError = 50002
 	//CodeParamErr 各种奇奇怪怪的参数错误
-	CodeParamErr = 40001
+	CodeParamErr = 500
 
 	UsernameExist = 40002
 

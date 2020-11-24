@@ -67,7 +67,7 @@ func (service *UpdateUserInfoRequest) UpdateUserInfo(c *gin.Context) (model.User
 	// TODO 增加令牌，整合redis
 	err := model.DB.Model(&user).Update(&user).Error
 	if err != nil {
-		setCookie(c, &user)
+		SetCookie(c, &user)
 	}
 
 	return user, err
@@ -119,7 +119,7 @@ func (service *UploadFaceRequest) UploadFace(c *gin.Context) (model.Users, error
 
 	queryUserInfoRequest := QueryUserInfoRequest{UserId: service.UserId}
 	info, err := queryUserInfoRequest.QueryUserInfo()
-	setCookie(c, &info)
+	SetCookie(c, &info)
 	return info, err
 }
 

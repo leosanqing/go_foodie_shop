@@ -91,6 +91,7 @@ func NewRouter() *gin.Engine {
 			myComments.GET("query", c.QueryMyComment)
 			myComments.POST("saveList", c.SaveCommentList)
 		}
+
 		myOrders := v1.Group("my_orders")
 		{
 			myOrders.GET("query", c.QueryMyOrders)
@@ -101,6 +102,23 @@ func NewRouter() *gin.Engine {
 			myOrders.DELETE("order", c.DeleteOrder)
 		}
 
+		address := v1.Group("address")
+		{
+			address.GET("list", api.QueryAllAddress)
+			address.POST("add", api.AddAddress)
+		}
+
+		shopCart := v1.Group("shop_cart")
+		{
+			shopCart.POST("add", api.Add)
+		}
+
+		order := v1.Group("orders")
+		{
+			order.POST("create", api.CreateOrder)
+			order.GET("paid_order_info", api.GetPaidOrderInfo)
+
+		}
 		//search := v1.Group("search")
 
 		v1.GET("ping", api.Ping)
