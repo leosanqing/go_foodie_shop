@@ -14,7 +14,7 @@ func CreateOrder(c *gin.Context) {
 	var registerService service.CreateOrderRequest
 	if err := c.ShouldBindJSON(&registerService); err == nil {
 		// 获取cookie 内容
-		cookie, err := c.Cookie("shopcart")
+		cookie, err := c.Cookie(ShopCart)
 		if err != nil {
 			log.ServiceLog.Error(
 				"获取购物车信息失败",
@@ -62,7 +62,8 @@ func CreateOrder(c *gin.Context) {
 		}
 
 		jsonStr, _ := json.Marshal(&shopCartItems)
-		c.SetCookie("shopcart",
+		c.SetCookie(
+			ShopCart,
 			string(jsonStr),
 			3*2000,
 			"/",
