@@ -1,7 +1,6 @@
-package conf
+package configs
 
 import (
-
 	"github.com/joho/godotenv"
 	"go-foodie-shop/cache"
 	"go-foodie-shop/model"
@@ -19,7 +18,7 @@ func Init() {
 	util.BuildLogger(os.Getenv("LOG_LEVEL"))
 
 	// 读取翻译文件
-	if err := LoadLocales("conf/locales/zh-cn.yaml"); err != nil {
+	if err := LoadLocales("configs/locales/zh-cn.yaml"); err != nil {
 		util.Log().Panic("翻译文件加载失败", err)
 	}
 
