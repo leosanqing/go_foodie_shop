@@ -2,8 +2,10 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/gogf/gf/util/gconv"
 	"github.com/stretchr/testify/assert"
+	"go-foodie-shop/api"
 	"go-foodie-shop/model"
 	"go-foodie-shop/serializer"
 	"go-foodie-shop/service"
@@ -104,4 +106,137 @@ func TestDeliver(t *testing.T) {
 	//err := gconv.SliceStruct(result.Rows, &orderStatuses)
 	//fmt.Println(err)
 
+}
+
+type OrderStatus struct {
+	OrderId     string `gorm:"primary_key;not null" json:"orderId"`
+	OrderStatus int    `json:"orderStatus"`
+	CreatedTime string `json:"createdTime"`
+	PayTime     string `json:"payTime"`
+	SuccessTime string `json:"successTime"`
+	DeliverTime string `json:"deliverTime"`
+	CloseTime   string `json:"closeTime"`
+	CommentTime string `json:"commentTime"`
+}
+
+func TestGetPaidOrderInfo(t *testing.T) {
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/api/v1/orders/paid_order_info?orderId=190830BW77HM55KP", nil)
+	//cookie, err := req.Cookie("user")
+
+	R.ServeHTTP(w, req)
+	assert.Equal(t, 200, w.Code)
+
+	response := serializer.Response{}
+	_ = json.Unmarshal(w.Body.Bytes(), &response)
+
+	orderStatus := OrderStatus{}
+	err := gconv.Struct(response.Data, &orderStatus)
+	fmt.Println(err)
+
+	assert.Equal(t, "190830BW77HM55KP", orderStatus.OrderId)
+	assert.Equal(t, int(service.WaitDeliver), orderStatus.OrderStatus)
+	assert.Equal(t, "2019-08-30 16:37:36", orderStatus.CreatedTime)
+	assert.Equal(t, "2019-08-30 16:39:30", orderStatus.PayTime)
+	assert.Equal(t, "2020-11-21 16:22:39", orderStatus.DeliverTime)
+	assert.Empty(t, orderStatus.SuccessTime)
+	assert.Empty(t, orderStatus.CloseTime)
+	assert.Empty(t, orderStatus.CommentTime)
+}
+
+func TestGetPaidOrderInfo_fail_byNoOrderId(t *testing.T) {
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/api/v1/orders/paid_order_info?orderId=", nil)
+	//cookie, err := req.Cookie("user")
+
+	R.ServeHTTP(w, req)
+	assert.Equal(t, 400, w.Code)
+
+	response := serializer.Response{}
+	_ = json.Unmarshal(w.Body.Bytes(), &response)
+
+	assert.Equal(t, 500, response.Status)
+	assert.Equal(t, "参数错误", response.Msg)
+	assert.Equal(t, "Key: 'QueryPaidOrderInfoRequest.OrderId' Error:Field validation for 'OrderId' failed on the 'required' tag", response.Error)
+}
+
+func TestCreateOrder_shouldBeFail_noCookie(t *testing.T) {
+
+	request := service.CreateOrderRequest{
+		UserId:      "19120779W7TK6800",
+		ItemSpecIds: "4",
+		AddressId:   "1330758824650346496",
+		PayMethod:   service.WxPay,
+	}
+
+	marshal, _ := json.Marshal(request)
+
+	fmt.Println(request)
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/api/v1/orders/create", NewBuffer(marshal))
+
+	R.ServeHTTP(w, req)
+	assert.Equal(t, 200, w.Code)
+
+	response := serializer.Response{}
+	_ = json.Unmarshal(w.Body.Bytes(), &response)
+
+	assert.Equal(t, 500, response.Status)
+	assert.Equal(t, "参数错误", response.Msg)
+	assert.Equal(t, "获取购物车信息失败", response.Error)
+}
+
+func TestCreateOrder(t *testing.T) {
+
+	request := service.CreateOrderRequest{
+		UserId:      "19120779W7TK6800",
+		ItemSpecIds: "4",
+		AddressId:   "1330758824650346496",
+		PayMethod:   service.WxPay,
+	}
+
+	marshal, _ := json.Marshal(request)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/api/v1/orders/create", NewBuffer(marshal))
+
+	shopCartBOS := []service.ShopCartBO{
+		{
+			ItemId:        "cake-1002",
+			ItemImgUrl:    "http://122.152.205.72:88/foodie/cake-1002/img1.png",
+			ItemName:      "【天天吃货】网红烘焙蛋糕 好吃的蛋糕",
+			SpecId:        "4",
+			SpecName:      "巧克力",
+			BuyCounts:     3,
+			PriceDiscount: "36000",
+			PriceNormal:   "40000",
+		},
+	}
+	bytes, _ := json.Marshal(shopCartBOS)
+	cookie := http.Cookie{
+		Name:     api.ShopCart,
+		Value:    string(bytes),
+		MaxAge:   3 * 2000,
+		Path:     "/",
+		Domain:   "localhost",
+		Secure:   false,
+		HttpOnly: false,
+	}
+	// FIXME 设置cookie 会去除 '"'
+	req.AddCookie(&cookie)
+	c, err := req.Cookie(api.ShopCart)
+	//
+	fmt.Println(c)
+	fmt.Println(err)
+	//
+	R.ServeHTTP(w, req)
+	assert.Equal(t, 200, w.Code)
+	//
+	//response := serializer.Response{}
+	//_ = json.Unmarshal(w.Body.Bytes(),&response)
+	//
+	//assert.Equal(t,"参数错误",response.Msg)
+	//assert.Equal(t,"Key: 'QueryPaidOrderInfoRequest.OrderId' Error:Field validation for 'OrderId' failed on the 'required' tag",response.Error)
 }
