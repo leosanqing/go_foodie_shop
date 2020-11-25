@@ -1,42 +1,69 @@
 package api
 
 import (
-	"errors"
 	"github.com/gin-gonic/gin"
-	"go-foodie-shop/middleware/log"
 	"go-foodie-shop/serializer"
 	"go-foodie-shop/service"
-	"go-foodie-shop/util"
-	"go.uber.org/zap"
 )
+
+const ShopCart = "shopcart"
 
 // Add 查询商品
 func Add(c *gin.Context) {
-	var searchItemService service.SearchItemService
-	if err := c.ShouldBind(&searchItemService); err == nil {
-		if searchItemService.Keywords == "" {
-			c.JSON(200, ErrorResponse(errors.New("请输入要查询的关键字")))
-			return
+	var addShopCatItemRequest service.AddShopCatItemRequest
+	if err := c.ShouldBind(&addShopCatItemRequest); err == nil {
+		userId, b := c.GetQuery("userId")
+		if !b {
+			c.JSON(400, ErrorResponse(err))
 		}
-		items, count, err := searchItemService.SearchItems()
-		if err != nil {
-			log.ServiceLog.Error(
-				"search item by id err ",
-				zap.Any("searchItemService", searchItemService),
-				zap.Error(err),
-			)
-			c.JSON(200, ErrorResponse(errors.New("查询商品失败")))
-			return
-		}
-
-		result := util.PagedGridResult(items, count, searchItemService.Page.Page, searchItemService.PageSize)
-
+		addShopCatItemRequest.UserId = userId
+		//
+		//err := addShopCatItemRequest.AddItem(c)
+		//
+		//var shopCartBOS []service.ShopCartBO
+		//cookie, err := c.Cookie(ShopCart)
+		//if len(cookie) == 0{
+		//	shopCartBOS = append(shopCartBOS, addShopCatItemRequest.ShopCartBO)
+		//}else {
+		//	err = json.Unmarshal([]byte(cookie), &shopCartBOS)
+		//	if err != nil{
+		//		c.JSON(400, ErrorResponse(err))
+		//		return
+		//	}
+		//	isExist := false
+		//	for i, bo := range shopCartBOS {
+		//		if bo.SpecId == addShopCatItemRequest.SpecId{
+		//			shopCartBOS[i].BuyCounts += addShopCatItemRequest.BuyCounts
+		//			isExist = true
+		//		}
+		//	}
+		//	if !isExist{
+		//		shopCartBOS = append(shopCartBOS, addShopCatItemRequest.ShopCartBO)
+		//	}
+		//}
+		//jsonStr, _ := json.Marshal(&shopCartBOS)
+		//
+		//c.SetCookie("shopcart",
+		//	string(jsonStr),
+		//	3*2000,
+		//	"/",
+		//	"localhost",
+		//	false,
+		//	false,
+		//)
+		//
+		//if err != nil {
+		//	c.JSON(200, ErrorResponse(err))
+		//	return
+		//}
+		//
+		//fmt.Println(err)
 		c.JSON(200, serializer.Response{
 			Status: 200,
-			Data:   result,
+			Data:   nil,
 			Msg:    "success",
 		})
 	} else {
-		c.JSON(200, ErrorResponse(err))
+		c.JSON(400, ErrorResponse(err))
 	}
 }

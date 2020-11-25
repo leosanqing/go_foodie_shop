@@ -23,7 +23,7 @@ func NewLogger(filePath string, level zapcore.Level, maxSize, maxBackups, maxAge
 }
 
 /**
- * zapcore构造
+ * zap_core构造
  */
 func newCore(filePath string, level zapcore.Level, maxSize, maxBackups, maxAge int, compress bool) zapcore.Core {
 	//日志文件路径配置2
@@ -42,7 +42,7 @@ func newCore(filePath string, level zapcore.Level, maxSize, maxBackups, maxAge i
 		TimeKey:        "time",
 		LevelKey:       "level",
 		NameKey:        "logger",
-		CallerKey:      "linenum",
+		CallerKey:      "line_num",
 		MessageKey:     "msg",
 		StacktraceKey:  "stacktrace",
 		LineEnding:     zapcore.DefaultLineEnding,
