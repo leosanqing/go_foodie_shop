@@ -18,7 +18,7 @@ func LoadLocales(path string) error {
 	}
 
 	m := make(map[interface{}]interface{})
-	err = yaml.Unmarshal([]byte(data), &m)
+	err = yaml.Unmarshal(data, &m)
 	if err != nil {
 		return err
 	}
