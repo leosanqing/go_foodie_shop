@@ -1,8 +1,9 @@
 package cache
 
 import (
-	"go-foodie-shop/util"
 	"github.com/go-redis/redis"
+	"go-foodie-shop/middleware/log"
+	"go.uber.org/zap"
 	"os"
 	"strconv"
 )
@@ -23,7 +24,8 @@ func Redis() {
 	_, err := client.Ping().Result()
 
 	if err != nil {
-		util.Log().Panic("连接Redis不成功", err)
+		log.ServiceLog.Error("连接Redis不成功", zap.Error(err))
+		//util.Log().Panic("连接Redis不成功", err)
 	}
 
 	RedisClient = client
