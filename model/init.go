@@ -13,13 +13,13 @@ var DB *gorm.DB
 // Database 在中间件中初始化mysql链接
 func Database(connString string) {
 	db, err := gorm.Open("mysql", connString)
-	db.LogMode(true)
-	// TODO  如果不设置，model 映射的表名会加 s
-	db.SingularTable(true)
-	// Error
 	if err != nil {
 		util.Log().Panic("连接数据库不成功", err)
 	}
+
+	db.LogMode(true)
+	// TODO  如果不设置，model 映射的表名会加 s
+	db.SingularTable(true)
 	//设置连接池
 	//空闲
 	db.DB().SetMaxIdleConns(50)

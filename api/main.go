@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"go-foodie-shop/conf"
+	"go-foodie-shop/configs"
 	"go-foodie-shop/model"
 	"go-foodie-shop/serializer"
 	validator "gopkg.in/go-playground/validator.v8"
@@ -36,8 +36,8 @@ func CurrentUser(c *gin.Context) *model.Users {
 func ErrorResponse(err error) serializer.Response {
 	if ve, ok := err.(validator.ValidationErrors); ok {
 		for _, e := range ve {
-			field := conf.T(fmt.Sprintf("Field.%s", e.Field))
-			tag := conf.T(fmt.Sprintf("Tag.Valid.%s", e.Tag))
+			field := configs.T(fmt.Sprintf("Field.%s", e.Field))
+			tag := configs.T(fmt.Sprintf("Tag.Valid.%s", e.Tag))
 			return serializer.ParamErr(
 				fmt.Sprintf("%s%s", field, tag),
 				err,

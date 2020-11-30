@@ -1,4 +1,4 @@
-package tests
+package test
 
 import "github.com/gin-gonic/gin"
 
