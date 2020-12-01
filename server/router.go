@@ -49,7 +49,7 @@ func NewRouter() *gin.Engine {
 		index := v1.Group("index")
 		{
 			// 首页轮播图
-			index.GET("carousel", api.Carousel)
+			index.GET("carousel", api.QueryCarousel)
 			// 查询分类信息
 			index.GET("cats", api.Cats)
 			// 查询子分类信息

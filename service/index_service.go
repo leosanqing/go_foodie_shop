@@ -1,8 +1,11 @@
 package service
 
 import (
+	"errors"
+	"go-foodie-shop/middleware/log"
 	"go-foodie-shop/model"
 	"go-foodie-shop/serializer"
+	"go.uber.org/zap"
 )
 
 type IndexService struct {
@@ -12,7 +15,7 @@ type QueryItemByIdRequest struct {
 	RootCatId string `uri:"rootCatId" json:"rootCatId" binding:"required,max=30"`
 }
 
-func (service *IndexService) QueryCarouselList() serializer.Response {
+func (service *IndexService) QueryCarouselList() ([]model.Carousel, error) {
 	var carousel []model.Carousel
 
 	if err := model.DB.
@@ -20,14 +23,11 @@ func (service *IndexService) QueryCarouselList() serializer.Response {
 		Order("sort").
 		Find(&carousel).
 		Error; err != nil {
-		return serializer.ParamErr("查询轮播图出错", nil)
+		log.ServiceLog.Error("查询轮播图出错", zap.Error(err))
+		return carousel, errors.New("查询轮播图出错")
 	}
 
-	return serializer.Response{
-		Status: 200,
-		Msg:    "success",
-		Data:   carousel,
-	}
+	return carousel, nil
 }
 
 func (service *IndexService) QueryAllRootLevelCats() serializer.Response {
