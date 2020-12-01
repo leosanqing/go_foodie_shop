@@ -1,9 +1,5 @@
 package service
 
-import (
-	"github.com/gin-gonic/gin"
-)
-
 type AddShopCatItemRequest struct {
 	UserId string `form:"userId" json:"userId" binding:"max=30"`
 	ShopCartBO
@@ -16,10 +12,6 @@ type ShopCartBO struct {
 	SpecId        string `form:"specId" json:"specId"`
 	SpecName      string `form:"specName" json:"specName"`
 	BuyCounts     int    `form:"buyCounts" json:"buyCounts"`
-	PriceDiscount string `form:"priceDiscount" json:"priceDiscount"`
-	PriceNormal   string `form:"priceNormal" json:"priceNormal"`
-}
-
-func (r *AddShopCatItemRequest) AddItem(c *gin.Context) error {
-	return nil
+	PriceDiscount int    `form:"priceDiscount" json:"priceDiscount"`
+	PriceNormal   int    `form:"priceNormal" json:"priceNormal"`
 }
