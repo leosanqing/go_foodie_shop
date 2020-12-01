@@ -92,7 +92,7 @@ func TestLogin(t *testing.T) {
 	var dat map[string]interface{}
 
 	_ = json.Unmarshal(w.Body.Bytes(), &dat)
-	assert.Equal(t, "登录成功", dat["msg"])
+	assert.Equal(t, float64(200), dat["status"])
 
 }
 
