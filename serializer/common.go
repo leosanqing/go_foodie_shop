@@ -25,16 +25,21 @@ const (
 	CodeCheckLogin = 401
 	// CodeNoRightErr 未授权访问
 	CodeNoRightErr = 403
-	// CodeDBError 数据库操作失败
-	CodeDBError = 50001
-	// CodeEncryptError 加密失败
-	CodeEncryptError = 50002
+
 	//CodeParamErr 各种奇奇怪怪的参数错误
 	CodeParamErr = 500
+)
 
+const (
 	UsernameExist = 40002
+)
 
-	GenerateIdFailed = 4003
+const (
+	CodeDBError      = 50001 + iota // CodeDBError 数据库操作失败
+	CodeEncryptError                // CodeEncryptError 加密失败
+	JsonConvertError                // JsonConvertError json 转换异常
+	GenerateIdFailed                // GenerateIdFailed 生成Id异常
+
 )
 
 // CheckLogin 检查登录
@@ -72,4 +77,9 @@ func ParamErr(msg string, err error) Response {
 		msg = "参数错误"
 	}
 	return Err(CodeParamErr, msg, err)
+}
+
+// JsonConvertErr JSON 转换错误
+func JsonConvertErr(err error) Response {
+	return Err(CodeParamErr, "Json 转换异常", err)
 }
