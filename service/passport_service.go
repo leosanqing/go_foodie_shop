@@ -44,7 +44,7 @@ func (r *RegisterRequest) setSession(c *gin.Context, user model.Users) {
 	s := sessions.Default(c)
 	s.Clear()
 	s.Set("user_id", user.Id)
-	s.Save()
+	_ = s.Save()
 }
 
 // Login 用户登录函数
@@ -140,8 +140,8 @@ func (r *RegisterRequest) Register(c *gin.Context) (model.Users, error) {
 		return model.Users{}, errors.New("创建用户失败")
 	}
 
+	// 整合Redis
 	userVO := user.ConvertUsersVO()
-	// TODO 整合Redis
 	SetCookie(c, userVO)
 	return user, nil
 }

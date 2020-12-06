@@ -63,9 +63,9 @@ func (service *UpdateUserInfoRequest) UpdateUserInfo(c *gin.Context) (model.User
 		UpdatedTime: time.Now(),
 	}
 
-	// TODO 增加令牌，整合redis
 	err := model.DB.Model(&user).Update(&user).Error
 
+	// 增加令牌，整合redis
 	vo := user.ConvertUsersVO()
 	if err != nil {
 		SetCookie(c, vo)
