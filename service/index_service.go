@@ -30,20 +30,22 @@ func (service *IndexService) QueryCarouselList() ([]model.Carousel, error) {
 	return carousel, nil
 }
 
-func (service *IndexService) QueryAllRootLevelCats() serializer.Response {
+// QueryAllRootLevelCats 查询所有一级目录
+func (service *IndexService) QueryAllRootLevelCats() ([]model.Category, error) {
 	var cats []model.Category
-	if err := model.DB.
+	err := model.DB.
 		Where("type = ?", 1).
 		Find(&cats).
-		Error; err != nil {
-		return serializer.ParamErr("查询分类出错", nil)
+		Error
+
+	if err != nil {
+		log.ServiceLog.Error("查询一级分类出错", zap.Error(err))
+		return nil, err
 	}
 
-	return serializer.Response{
-		Status: 200,
-		Msg:    "success",
-		Data:   cats,
-	}
+	log.ServiceLog.Info("查询一级分类结果", zap.Any("cats", cats))
+
+	return cats, nil
 }
 
 //
