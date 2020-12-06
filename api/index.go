@@ -61,7 +61,7 @@ func Cats(c *gin.Context) {
 
 		// 先查询 redis ，如果redis 没有数据则去数据库查询
 		catJsonStr := cache.RedisClient.Get(cache.CatsKey).Val()
-		log.ServiceLog.Info("查询 redis 中的 以及分类信息", zap.String(cache.CatsKey, catJsonStr))
+		log.ServiceLog.Info("查询 redis 中的 一级分类信息", zap.String(cache.CatsKey, catJsonStr))
 
 		var cats []model.Category
 		if "" != catJsonStr {
@@ -93,25 +93,28 @@ func SubCats(c *gin.Context) {
 	var indexService = service.QueryItemByIdRequest{}
 	if err := c.ShouldBindUri(&indexService); err == nil {
 		subCatJsonStr := cache.RedisClient.Get(cache.SubCatKey).Val()
-		log.ServiceLog.Info("查询 redis 中的 以及分类信息", zap.String(cache.SubCatKey, subCatJsonStr))
+		log.ServiceLog.Info("查询 redis 中的 二级分类信息", zap.String(cache.SubCatKey, subCatJsonStr))
 
-		var cats []model.CategoryVO
+		var subCats []model.CategoryVO
 		if "" != subCatJsonStr {
-			err := json.Unmarshal([]byte(subCatJsonStr), &cats)
+			err := json.Unmarshal([]byte(subCatJsonStr), &subCats)
 			if err != nil {
 				log.ServiceLog.Error("Json 转换异常", zap.String("subCatJsonStr", subCatJsonStr), zap.Error(err))
 				c.JSON(200, serializer.JsonConvertErr(err))
 			} else {
-				c.JSON(200, SuccessResponse(cats))
+				c.JSON(200, SuccessResponse(subCats))
 			}
 			return
 		}
 
-		cats, err := indexService.QuerySubCats()
+		subCats, err := indexService.QuerySubCats()
 		if err != nil {
 			c.JSON(200, serializer.DBErr("查询子分类异常", err))
 		} else {
-			c.JSON(200, SuccessResponse(cats))
+			// 存入 redis
+			marshal, _ := json.Marshal(subCats)
+			cache.RedisClient.Set(cache.SubCatKey+indexService.RootCatId, marshal, Zero)
+			c.JSON(200, SuccessResponse(subCats))
 		}
 	} else {
 		c.JSON(400, ErrorResponse(err))
