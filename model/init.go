@@ -18,7 +18,7 @@ func Database(connString string) {
 	}
 
 	db.LogMode(true)
-	// TODO  如果不设置，model 映射的表名会加 s
+	//  如果不设置，model 映射的表名会加 s
 	db.SingularTable(true)
 	//设置连接池
 	//空闲

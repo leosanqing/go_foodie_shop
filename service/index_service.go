@@ -30,20 +30,22 @@ func (service *IndexService) QueryCarouselList() ([]model.Carousel, error) {
 	return carousel, nil
 }
 
-func (service *IndexService) QueryAllRootLevelCats() serializer.Response {
+// QueryAllRootLevelCats 查询所有一级目录
+func (service *IndexService) QueryAllRootLevelCats() ([]model.Category, error) {
 	var cats []model.Category
-	if err := model.DB.
+	err := model.DB.
 		Where("type = ?", 1).
 		Find(&cats).
-		Error; err != nil {
-		return serializer.ParamErr("查询分类出错", nil)
+		Error
+
+	if err != nil {
+		log.ServiceLog.Error("查询一级分类出错", zap.Error(err))
+		return nil, err
 	}
 
-	return serializer.Response{
-		Status: 200,
-		Msg:    "success",
-		Data:   cats,
-	}
+	log.ServiceLog.Info("查询一级分类结果", zap.Any("cats", cats))
+
+	return cats, nil
 }
 
 //
@@ -76,7 +78,7 @@ func (service *IndexService) QueryAllRootLevelCats() serializer.Response {
 //	}
 //}
 
-func (r *QueryItemByIdRequest) QuerySubCats() serializer.Response {
+func (r *QueryItemByIdRequest) QuerySubCats() ([]model.CategoryVO, error) {
 	var catVOS []model.SubCategory
 	err := model.DB.
 		Raw(
@@ -98,18 +100,11 @@ func (r *QueryItemByIdRequest) QuerySubCats() serializer.Response {
 		Error
 
 	if err != nil {
-		return serializer.Response{
-			Status: 400,
-			Data:   nil,
-			Msg:    "查询子分类异常",
-		}
+		log.ServiceLog.Error("根据分类ID 查询子分类异常", zap.String("rootCatId", r.RootCatId), zap.Error(err))
+		return nil, err
 	}
 	cats := handleSubCats(catVOS)
-	return serializer.Response{
-		Status: 200,
-		Data:   cats,
-		Msg:    "查询子分类成功",
-	}
+	return cats, nil
 }
 
 func handleSubCats(subCats []model.SubCategory) []model.CategoryVO {

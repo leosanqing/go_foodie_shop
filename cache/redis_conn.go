@@ -11,6 +11,13 @@ import (
 // RedisClient Redis缓存客户端单例
 var RedisClient *redis.Client
 
+const (
+	RedisUserToken = "redis_user_token:"
+	CarouselKey    = "carousel"
+	CatsKey        = "cats"
+	SubCatKey      = "subCat:"
+)
+
 // Redis 在中间件中初始化redis链接
 func Redis() {
 	db, _ := strconv.ParseUint(os.Getenv("REDIS_DB"), 10, 64)

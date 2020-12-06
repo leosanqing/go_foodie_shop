@@ -32,20 +32,6 @@ func NewRouter() *gin.Engine {
 	// 路由
 	v1 := r.Group("/api/v1")
 	{
-		passport := v1.Group("passport")
-		{
-			//  判断用户名是否存在
-			passport.GET("usernameIsExist", api.UsernameIsExist)
-
-			// 用户注册
-			passport.POST("regist", api.UserRegister)
-
-			// 用户登录
-			passport.POST("login", api.UserLogin)
-			// 用户退出
-			passport.DELETE("logout", api.UserLogout)
-		}
-
 		index := v1.Group("index")
 		{
 			// 首页轮播图
@@ -74,54 +60,15 @@ func NewRouter() *gin.Engine {
 			item.GET("refresh", api.QueryItemsBySpecIds)
 		}
 
-		center := v1.Group("center")
+		passport := v1.Group("passport")
 		{
-			center.GET("userInfo", c.QueryUserInfo)
+			//  判断用户名是否存在
+			passport.GET("usernameIsExist", api.UsernameIsExist)
+			// 用户注册
+			passport.POST("regist", api.UserRegister)
+			// 用户登录
+			passport.POST("login", api.UserLogin)
 		}
-
-		userInfo := v1.Group("userInfo")
-		{
-			userInfo.POST("update", c.UpdateUserInfo)
-			userInfo.POST("uploadFace", c.UploadFace)
-		}
-
-		myComments := v1.Group("mycomment")
-		{
-			myComments.POST("pending", c.Pending)
-			myComments.GET("query", c.QueryMyComment)
-			myComments.POST("saveList", c.SaveCommentList)
-		}
-
-		myOrders := v1.Group("my_orders")
-		{
-			myOrders.GET("query", c.QueryMyOrders)
-			myOrders.GET("trend", c.QueryTrend)
-			myOrders.GET("status_counts", c.StatusCounts)
-			myOrders.POST("deliver", c.Deliver)
-			myOrders.POST("confirm_receive", c.ConfirmReceiver)
-			myOrders.DELETE("order", c.DeleteOrder)
-		}
-
-		address := v1.Group("address")
-		{
-			address.GET("list", api.QueryAllAddress)
-			address.POST("add", api.AddAddress)
-		}
-
-		shopCart := v1.Group("shop_cart")
-		{
-			shopCart.POST("add", api.Add)
-		}
-
-		order := v1.Group("orders")
-		{
-			order.POST("create", api.CreateOrder)
-			order.GET("paid_order_info", api.GetPaidOrderInfo)
-
-		}
-		//search := v1.Group("search")
-
-		v1.GET("ping", api.Ping)
 
 		// 需要登录保护的
 		auth := v1.Group("")
@@ -130,7 +77,62 @@ func NewRouter() *gin.Engine {
 			// User Routing
 			//auth.GET("user/me", api.UserMe)
 			auth.DELETE("user/logout", api.UserLogout)
+
+			passport2 := auth.Group("passport")
+			{
+				// 用户退出
+				passport2.DELETE("logout", api.UserLogout)
+			}
+
+			center := auth.Group("center")
+			{
+				center.GET("userInfo", c.QueryUserInfo)
+			}
+
+			userInfo := auth.Group("userInfo")
+			{
+				userInfo.POST("update", c.UpdateUserInfo)
+				userInfo.POST("uploadFace", c.UploadFace)
+			}
+
+			myComments := auth.Group("mycomment")
+			{
+				myComments.POST("pending", c.Pending)
+				myComments.GET("query", c.QueryMyComment)
+				myComments.POST("saveList", c.SaveCommentList)
+			}
+
+			myOrders := auth.Group("my_orders")
+			{
+				myOrders.GET("query", c.QueryMyOrders)
+				myOrders.GET("trend", c.QueryTrend)
+				myOrders.GET("status_counts", c.StatusCounts)
+				myOrders.POST("deliver", c.Deliver)
+				myOrders.POST("confirm_receive", c.ConfirmReceiver)
+				myOrders.DELETE("order", c.DeleteOrder)
+			}
+
+			address := auth.Group("address")
+			{
+				address.GET("list", api.QueryAllAddress)
+				address.POST("add", api.AddAddress)
+			}
+
+			shopCart := auth.Group("shop_cart")
+			{
+				shopCart.POST("add", api.Add)
+			}
+
+			order := auth.Group("orders")
+			{
+				order.POST("create", api.CreateOrder)
+				order.GET("paid_order_info", api.GetPaidOrderInfo)
+
+			}
 		}
+
+		//search := v1.Group("search")
+
 	}
 	return r
 }

@@ -81,5 +81,5 @@ func ParamErr(msg string, err error) Response {
 
 // JsonConvertErr JSON 转换错误
 func JsonConvertErr(err error) Response {
-	return Err(CodeParamErr, "Json 转换异常", err)
+	return Err(JsonConvertError, "Json 转换异常", err)
 }

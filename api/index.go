@@ -12,10 +12,6 @@ import (
 )
 
 const (
-	CarouselKey = "carousel"
-)
-
-const (
 	Zero = 0
 )
 
@@ -29,7 +25,7 @@ func QueryCarousel(c *gin.Context) {
 	if err := c.ShouldBind(&indexService); err == nil {
 		var carouselList []model.Carousel
 		// 先查询 redis ，如果redis 没有数据则去数据库查询
-		carouselStr := cache.RedisClient.Get(CarouselKey).Val()
+		carouselStr := cache.RedisClient.Get(cache.CarouselKey).Val()
 		log.ServiceLog.Info("查询 redis 中的 轮播图信息", zap.String("carousel", carouselStr))
 
 		if "" != carouselStr {
@@ -50,20 +46,45 @@ func QueryCarousel(c *gin.Context) {
 		}
 		// 存入 redis
 		marshal, _ := json.Marshal(carouselList)
-		cache.RedisClient.Set(CarouselKey, marshal, Zero)
-		c.JSON(200, serializer.Response{Status: Success, Data: carouselList})
+		cache.RedisClient.Set(cache.CarouselKey, marshal, Zero)
+		c.JSON(200, SuccessResponse(carouselList))
 	} else {
 		c.JSON(200, ErrorResponse(err))
 	}
 }
 
-// Cats 查询以及目录下的所有分类
+// Cats 查询一级目录下的所有分类
+// 目录更新不会很频繁，所以也是用 redis 进行缓存
 func Cats(c *gin.Context) {
 	var indexService = service.IndexService{}
 	if err := c.ShouldBind(&indexService); err == nil {
-		c.JSON(200, indexService.QueryAllRootLevelCats())
+
+		// 先查询 redis ，如果redis 没有数据则去数据库查询
+		catJsonStr := cache.RedisClient.Get(cache.CatsKey).Val()
+		log.ServiceLog.Info("查询 redis 中的 一级分类信息", zap.String(cache.CatsKey, catJsonStr))
+
+		var cats []model.Category
+		if "" != catJsonStr {
+			err := json.Unmarshal([]byte(catJsonStr), &cats)
+			if err != nil {
+				log.ServiceLog.Error("Json 转换异常", zap.String("catJsonStr", catJsonStr), zap.Error(err))
+				c.JSON(200, serializer.JsonConvertErr(err))
+			} else {
+				c.JSON(200, SuccessResponse(cats))
+			}
+			return
+		}
+
+		cats, err := indexService.QueryAllRootLevelCats()
+		if err != nil {
+			c.JSON(200, serializer.DBErr("查询一级目录失败", err))
+			return
+		}
+		marshal, _ := json.Marshal(cats)
+		cache.RedisClient.Set(cache.CatsKey, marshal, Zero)
+		c.JSON(200, SuccessResponse(cats))
 	} else {
-		c.JSON(200, ErrorResponse(err))
+		c.JSON(400, ErrorResponse(err))
 	}
 }
 
@@ -71,7 +92,30 @@ func Cats(c *gin.Context) {
 func SubCats(c *gin.Context) {
 	var indexService = service.QueryItemByIdRequest{}
 	if err := c.ShouldBindUri(&indexService); err == nil {
-		c.JSON(200, indexService.QuerySubCats())
+		subCatJsonStr := cache.RedisClient.Get(cache.SubCatKey).Val()
+		log.ServiceLog.Info("查询 redis 中的 二级分类信息", zap.String(cache.SubCatKey, subCatJsonStr))
+
+		var subCats []model.CategoryVO
+		if "" != subCatJsonStr {
+			err := json.Unmarshal([]byte(subCatJsonStr), &subCats)
+			if err != nil {
+				log.ServiceLog.Error("Json 转换异常", zap.String("subCatJsonStr", subCatJsonStr), zap.Error(err))
+				c.JSON(200, serializer.JsonConvertErr(err))
+			} else {
+				c.JSON(200, SuccessResponse(subCats))
+			}
+			return
+		}
+
+		subCats, err := indexService.QuerySubCats()
+		if err != nil {
+			c.JSON(200, serializer.DBErr("查询子分类异常", err))
+		} else {
+			// 存入 redis
+			marshal, _ := json.Marshal(subCats)
+			cache.RedisClient.Set(cache.SubCatKey+indexService.RootCatId, marshal, Zero)
+			c.JSON(200, SuccessResponse(subCats))
+		}
 	} else {
 		c.JSON(400, ErrorResponse(err))
 	}

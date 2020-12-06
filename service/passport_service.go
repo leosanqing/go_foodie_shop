@@ -44,7 +44,7 @@ func (r *RegisterRequest) setSession(c *gin.Context, user model.Users) {
 	s := sessions.Default(c)
 	s.Clear()
 	s.Set("user_id", user.Id)
-	s.Save()
+	_ = s.Save()
 }
 
 // Login 用户登录函数
@@ -64,21 +64,14 @@ func (r *LoginRequest) Login(c *gin.Context) (model.Users, error) {
 		return user, errors.New("账号或密码错误")
 	}
 
-	SetCookie(c, &user)
+	vo := user.ConvertUsersVO()
+	SetCookie(c, vo)
 
 	return user, nil
 }
 
-func SetCookie(c *gin.Context, user *model.Users) {
-	id, _ := util.NextId()
-	jsonStr, _ := json.Marshal(&model.Cookie{
-		Id:              user.Id,
-		Username:        user.Username,
-		Nickname:        user.Nickname,
-		Face:            user.Face,
-		Sex:             user.Sex,
-		UserUniqueToken: strconv.Itoa(int(id)),
-	})
+func SetCookie(c *gin.Context, user model.UserVO) {
+	jsonStr, _ := json.Marshal(user)
 
 	c.SetCookie("user",
 		string(jsonStr),
@@ -147,7 +140,8 @@ func (r *RegisterRequest) Register(c *gin.Context) (model.Users, error) {
 		return model.Users{}, errors.New("创建用户失败")
 	}
 
-	// TODO 整合Redis
-	SetCookie(c, &user)
+	// 整合Redis
+	userVO := user.ConvertUsersVO()
+	SetCookie(c, userVO)
 	return user, nil
 }
