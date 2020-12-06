@@ -50,3 +50,8 @@ func ErrorResponse(err error) serializer.Response {
 
 	return serializer.ParamErr("参数错误", err)
 }
+
+// SuccessResponse 返回成功
+func SuccessResponse(data interface{}) serializer.Response {
+	return serializer.Response{Status: Success, Data: data}
+}
