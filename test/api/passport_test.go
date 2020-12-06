@@ -99,7 +99,7 @@ func TestLogin(t *testing.T) {
 func TestLogout(t *testing.T) {
 
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("DELETE", "/api/v1/passport/logout", nil)
+	req, _ := http.NewRequest("DELETE", "/api/v1/passport/logout?userId=191207C12Y7CZ1GC", nil)
 	//cookie, err := req.Cookie("user")
 	R.ServeHTTP(w, req)
 
@@ -108,6 +108,6 @@ func TestLogout(t *testing.T) {
 	var dat map[string]interface{}
 
 	_ = json.Unmarshal(w.Body.Bytes(), &dat)
-	assert.Equal(t, "登出成功", dat["msg"])
+	assert.Equal(t, float64(200), dat["status"])
 
 }

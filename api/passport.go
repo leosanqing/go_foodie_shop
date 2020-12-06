@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"go-foodie-shop/cache"
 	"go-foodie-shop/serializer"
@@ -52,11 +53,16 @@ func UserLogin(c *gin.Context) {
 
 // UserLogout 用户退出
 func UserLogout(c *gin.Context) {
-	deleteCookie(c)
-	c.JSON(200, serializer.Response{
-		Status: 200,
-		Msg:    "登出成功",
-	})
+
+	userId, exist := c.GetQuery("userId")
+	if !exist {
+		c.JSON(400, ErrorResponse(errors.New("userId 不能为空")))
+	} else {
+		cache.RedisClient.Del(ShopCart + ":" + userId)
+		deleteCookie(c)
+		c.JSON(200, SuccessResponse(nil))
+	}
+
 }
 
 func deleteCookie(c *gin.Context) {

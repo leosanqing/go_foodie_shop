@@ -12,12 +12,6 @@ import (
 )
 
 const (
-	CarouselKey = "carousel"
-	CatsKey     = "cats"
-	SubCatKey   = "subCat:"
-)
-
-const (
 	Zero = 0
 )
 
@@ -31,7 +25,7 @@ func QueryCarousel(c *gin.Context) {
 	if err := c.ShouldBind(&indexService); err == nil {
 		var carouselList []model.Carousel
 		// 先查询 redis ，如果redis 没有数据则去数据库查询
-		carouselStr := cache.RedisClient.Get(CarouselKey).Val()
+		carouselStr := cache.RedisClient.Get(cache.CarouselKey).Val()
 		log.ServiceLog.Info("查询 redis 中的 轮播图信息", zap.String("carousel", carouselStr))
 
 		if "" != carouselStr {
@@ -52,7 +46,7 @@ func QueryCarousel(c *gin.Context) {
 		}
 		// 存入 redis
 		marshal, _ := json.Marshal(carouselList)
-		cache.RedisClient.Set(CarouselKey, marshal, Zero)
+		cache.RedisClient.Set(cache.CarouselKey, marshal, Zero)
 		c.JSON(200, SuccessResponse(carouselList))
 	} else {
 		c.JSON(200, ErrorResponse(err))
@@ -66,8 +60,8 @@ func Cats(c *gin.Context) {
 	if err := c.ShouldBind(&indexService); err == nil {
 
 		// 先查询 redis ，如果redis 没有数据则去数据库查询
-		catJsonStr := cache.RedisClient.Get(CatsKey).Val()
-		log.ServiceLog.Info("查询 redis 中的 以及分类信息", zap.String(CatsKey, catJsonStr))
+		catJsonStr := cache.RedisClient.Get(cache.CatsKey).Val()
+		log.ServiceLog.Info("查询 redis 中的 以及分类信息", zap.String(cache.CatsKey, catJsonStr))
 
 		var cats []model.Category
 		if "" != catJsonStr {
@@ -87,7 +81,7 @@ func Cats(c *gin.Context) {
 			return
 		}
 		marshal, _ := json.Marshal(cats)
-		cache.RedisClient.Set(CatsKey, marshal, Zero)
+		cache.RedisClient.Set(cache.CatsKey, marshal, Zero)
 		c.JSON(200, SuccessResponse(cats))
 	} else {
 		c.JSON(400, ErrorResponse(err))
@@ -98,8 +92,8 @@ func Cats(c *gin.Context) {
 func SubCats(c *gin.Context) {
 	var indexService = service.QueryItemByIdRequest{}
 	if err := c.ShouldBindUri(&indexService); err == nil {
-		subCatJsonStr := cache.RedisClient.Get(SubCatKey).Val()
-		log.ServiceLog.Info("查询 redis 中的 以及分类信息", zap.String(SubCatKey, subCatJsonStr))
+		subCatJsonStr := cache.RedisClient.Get(cache.SubCatKey).Val()
+		log.ServiceLog.Info("查询 redis 中的 以及分类信息", zap.String(cache.SubCatKey, subCatJsonStr))
 
 		var cats []model.CategoryVO
 		if "" != subCatJsonStr {

@@ -46,7 +46,6 @@ func (service *QueryUserInfoRequest) QueryUserInfo() (model.Users, error) {
 	err := model.DB.
 		First(&user).
 		Error
-	user.Password = ""
 	return user, err
 }
 
@@ -66,8 +65,10 @@ func (service *UpdateUserInfoRequest) UpdateUserInfo(c *gin.Context) (model.User
 
 	// TODO 增加令牌，整合redis
 	err := model.DB.Model(&user).Update(&user).Error
+
+	vo := user.ConvertUsersVO()
 	if err != nil {
-		SetCookie(c, &user)
+		SetCookie(c, vo)
 	}
 
 	return user, err
@@ -119,8 +120,12 @@ func (service *UploadFaceRequest) UploadFace(c *gin.Context) (model.Users, error
 
 	queryUserInfoRequest := QueryUserInfoRequest{UserId: service.UserId}
 	info, err := queryUserInfoRequest.QueryUserInfo()
-	SetCookie(c, &info)
-	return info, err
+	if err != nil {
+		return model.Users{}, err
+	}
+	vo := info.ConvertUsersVO()
+	SetCookie(c, vo)
+	return info, nil
 }
 
 func UpdateUserFace() {
