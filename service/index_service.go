@@ -78,7 +78,7 @@ func (service *IndexService) QueryAllRootLevelCats() ([]model.Category, error) {
 //	}
 //}
 
-func (r *QueryItemByIdRequest) QuerySubCats() serializer.Response {
+func (r *QueryItemByIdRequest) QuerySubCats() ([]model.CategoryVO, error) {
 	var catVOS []model.SubCategory
 	err := model.DB.
 		Raw(
@@ -100,18 +100,11 @@ func (r *QueryItemByIdRequest) QuerySubCats() serializer.Response {
 		Error
 
 	if err != nil {
-		return serializer.Response{
-			Status: 400,
-			Data:   nil,
-			Msg:    "查询子分类异常",
-		}
+		log.ServiceLog.Error("根据分类ID 查询子分类异常", zap.String("rootCatId", r.RootCatId), zap.Error(err))
+		return nil, err
 	}
 	cats := handleSubCats(catVOS)
-	return serializer.Response{
-		Status: 200,
-		Data:   cats,
-		Msg:    "查询子分类成功",
-	}
+	return cats, nil
 }
 
 func handleSubCats(subCats []model.SubCategory) []model.CategoryVO {

@@ -14,6 +14,7 @@ import (
 const (
 	CarouselKey = "carousel"
 	CatsKey     = "cats"
+	SubCatKey   = "subCat:"
 )
 
 const (
@@ -97,7 +98,27 @@ func Cats(c *gin.Context) {
 func SubCats(c *gin.Context) {
 	var indexService = service.QueryItemByIdRequest{}
 	if err := c.ShouldBindUri(&indexService); err == nil {
-		c.JSON(200, indexService.QuerySubCats())
+		subCatJsonStr := cache.RedisClient.Get(SubCatKey).Val()
+		log.ServiceLog.Info("查询 redis 中的 以及分类信息", zap.String(SubCatKey, subCatJsonStr))
+
+		var cats []model.CategoryVO
+		if "" != subCatJsonStr {
+			err := json.Unmarshal([]byte(subCatJsonStr), &cats)
+			if err != nil {
+				log.ServiceLog.Error("Json 转换异常", zap.String("subCatJsonStr", subCatJsonStr), zap.Error(err))
+				c.JSON(200, serializer.JsonConvertErr(err))
+			} else {
+				c.JSON(200, SuccessResponse(cats))
+			}
+			return
+		}
+
+		cats, err := indexService.QuerySubCats()
+		if err != nil {
+			c.JSON(200, serializer.DBErr("查询子分类异常", err))
+		} else {
+			c.JSON(200, SuccessResponse(cats))
+		}
 	} else {
 		c.JSON(400, ErrorResponse(err))
 	}
