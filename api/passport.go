@@ -58,7 +58,7 @@ func UserLogout(c *gin.Context) {
 	if !exist {
 		c.JSON(400, ErrorResponse(errors.New("userId 不能为空")))
 	} else {
-		cache.RedisClient.Del(ShopCart + ":" + userId)
+		cache.RedisClient.Del(cache.RedisUserToken + userId)
 		deleteCookie(c)
 		c.JSON(200, SuccessResponse(nil))
 	}
