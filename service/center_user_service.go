@@ -46,6 +46,8 @@ func (service *QueryUserInfoRequest) QueryUserInfo() (model.Users, error) {
 	err := model.DB.
 		First(&user).
 		Error
+
+	user.Password = ""
 	return user, err
 }
 

@@ -18,17 +18,14 @@ func QueryUserInfo(c *gin.Context) {
 		if err != nil {
 			log.ServiceLog.Error(
 				"查询用户信息失败",
-				zap.Any("userId", userInfoRequest.UserId),
+				zap.String("userId", userInfoRequest.UserId),
 				zap.Error(err),
 			)
 			c.JSON(200, api.ErrorResponse(errors.New("查询用户信息失败")))
 			return
 		}
 		log.ServiceLog.Info("查询用户信息成功", zap.Any("userInfo", userInfo))
-		c.JSON(200, serializer.Response{
-			Status: 200,
-			Data:   userInfo,
-		})
+		c.JSON(200, api.SuccessResponse(userInfo))
 	} else {
 		c.JSON(400, api.ErrorResponse(err))
 	}
@@ -53,10 +50,7 @@ func UpdateUserInfo(c *gin.Context) {
 		}
 		log.ServiceLog.Info("更新用户信息成功", zap.Any("userInfo", userInfo))
 
-		c.JSON(200, serializer.Response{
-			Status: 200,
-			Data:   userInfo,
-		})
+		c.JSON(200, api.SuccessResponse(userInfo))
 	} else {
 		c.JSON(400, api.ErrorResponse(err))
 	}

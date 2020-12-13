@@ -18,8 +18,12 @@ import (
 func TestQueryMyOrder(t *testing.T) {
 
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/api/v1/my_orders/query?userId=1908189H7TNWDTXP&orderStatus=&page=1&pageSize=3", nil)
-	//cookie, err := req.Cookie("user")
+	req, _ := http.NewRequest("GET", "/api/v1/my_orders/query?userId="+userId+"&orderStatus=&page=1&pageSize=3", nil)
+	header := http.Header{}
+	header.Add("headerUserId", userId)
+	header.Add("headerUserToken", *tokenImooc)
+	req.Header = header
+
 	R.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
@@ -56,17 +60,35 @@ func TestQueryMyOrder(t *testing.T) {
 	assert.Equal(t, 15000, vo.Price)
 }
 
-func TestQueryTrend(t *testing.T) {
-
+func TestQueryMyOrder_shouldReturn_needToLogin(t *testing.T) {
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/api/v1/my_orders/trend?userId=19120779W7TK6800&page=1&pageSize=3", nil)
-	//cookie, err := req.Cookie("user")
+	req, _ := http.NewRequest("GET", "/api/v1/my_orders/query?userId="+userId+"&orderStatus=&page=1&pageSize=3", nil)
+
 	R.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
 
 	var res serializer.Response
 	_ = json.Unmarshal(w.Body.Bytes(), &res)
+	assert.Equal(t, serializer.CodeCheckLogin, res.Status)
+}
+
+func TestQueryTrend(t *testing.T) {
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/api/v1/my_orders/trend?userId="+userId+"&page=1&pageSize=3", nil)
+	header := http.Header{}
+	header.Add("headerUserId", userId)
+	header.Add("headerUserToken", *tokenImooc)
+	req.Header = header
+
+	R.ServeHTTP(w, req)
+
+	assert.Equal(t, 200, w.Code)
+
+	var res serializer.Response
+	_ = json.Unmarshal(w.Body.Bytes(), &res)
+	assert.Equal(t, api.Success, res.Status)
+
 	var result util.PageResult
 	_ = gconv.Struct(res.Data, &result)
 
@@ -74,20 +96,59 @@ func TestQueryTrend(t *testing.T) {
 	//var orderStatuses []model.OrderStatus
 	//err := gconv.SliceStruct(result.Rows, &orderStatuses)
 	//fmt.Println(err)
-
 }
 
-func TestDeliver(t *testing.T) {
+func TestQueryTrend_shouldReturn_needToLogin(t *testing.T) {
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/api/v1/my_orders/trend?userId="+userId+"&page=1&pageSize=3", nil)
+	//cookie, err := req.Cookie("user")
+	R.ServeHTTP(w, req)
+
+	assert.Equal(t, 200, w.Code)
+
+	var res serializer.Response
+	_ = json.Unmarshal(w.Body.Bytes(), &res)
+	assert.Equal(t, serializer.CodeCheckLogin, res.Status)
+}
+
+func TestDeliver_shouldReturn_needToLogin(t *testing.T) {
+	orderId := "190830BW77HM55KP"
+
 	orderStatus := model.OrderStatus{
-		OrderId: "190830BW77HM55KP",
+		OrderId: orderId,
 	}
 	_ = model.DB.First(&orderStatus)
-	assert.Equal(t, "190830BW77HM55KP", orderStatus.OrderId)
+	assert.Equal(t, orderId, orderStatus.OrderId)
 	assert.Equal(t, 20, orderStatus.OrderStatus)
 
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("POST", "/api/v1/my_orders/deliver?orderId=190830BW77HM55KP", nil)
-	//cookie, err := req.Cookie("user")
+	req, _ := http.NewRequest("POST", "/api/v1/my_orders/deliver?orderId="+orderId, nil)
+
+	R.ServeHTTP(w, req)
+
+	assert.Equal(t, 200, w.Code)
+	var res serializer.Response
+	_ = json.Unmarshal(w.Body.Bytes(), &res)
+	assert.Equal(t, serializer.CodeCheckLogin, res.Status)
+}
+
+func TestDeliver(t *testing.T) {
+
+	orderId := "190830BW77HM55KP"
+
+	orderStatus := model.OrderStatus{
+		OrderId: orderId,
+	}
+	_ = model.DB.First(&orderStatus)
+	assert.Equal(t, orderId, orderStatus.OrderId)
+	assert.Equal(t, 20, orderStatus.OrderStatus)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/api/v1/my_orders/deliver?orderId="+orderId, nil)
+	header := http.Header{}
+	header.Add("headerUserId", userId)
+	header.Add("headerUserToken", *tokenImooc)
+	req.Header = header
 
 	R.ServeHTTP(w, req)
 
@@ -95,17 +156,17 @@ func TestDeliver(t *testing.T) {
 
 	// 再次查询验证是否更新
 	_ = model.DB.First(&orderStatus)
-	assert.Equal(t, "190830BW77HM55KP", orderStatus.OrderId)
+	assert.Equal(t, orderId, orderStatus.OrderId)
 	assert.Equal(t, 30, orderStatus.OrderStatus)
 	assert.NotEmpty(t, orderStatus.DeliverTime)
 
+	// 还原order
 	model.DB.Model(&model.OrderStatus{}).Where(&orderStatus).Update(&model.OrderStatus{OrderStatus: 20, DeliverTime: nil})
 
 	// fixme 字符串转指针对象问题
 	//var orderStatuses []model.OrderStatus
 	//err := gconv.SliceStruct(result.Rows, &orderStatuses)
 	//fmt.Println(err)
-
 }
 
 type OrderStatus struct {
@@ -119,10 +180,10 @@ type OrderStatus struct {
 	CommentTime string `json:"commentTime"`
 }
 
-func TestGetPaidOrderInfo(t *testing.T) {
-
+func TestGetPaidOrderInfo_shouldReturn_needToLogin(t *testing.T) {
+	orderId := "190830BW77HM55KP"
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/api/v1/orders/paid_order_info?orderId=190830BW77HM55KP", nil)
+	req, _ := http.NewRequest("GET", "/api/v1/orders/paid_order_info?orderId="+orderId, nil)
 	//cookie, err := req.Cookie("user")
 
 	R.ServeHTTP(w, req)
@@ -131,11 +192,29 @@ func TestGetPaidOrderInfo(t *testing.T) {
 	response := serializer.Response{}
 	_ = json.Unmarshal(w.Body.Bytes(), &response)
 
-	orderStatus := OrderStatus{}
-	err := gconv.Struct(response.Data, &orderStatus)
-	fmt.Println(err)
+	assert.Equal(t, serializer.CodeCheckLogin, response.Status)
+}
 
-	assert.Equal(t, "190830BW77HM55KP", orderStatus.OrderId)
+func TestGetPaidOrderInfo(t *testing.T) {
+	orderId := "190830BW77HM55KP"
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/api/v1/orders/paid_order_info?orderId="+orderId, nil)
+
+	header := http.Header{}
+	header.Add("headerUserId", userId)
+	header.Add("headerUserToken", *tokenImooc)
+	req.Header = header
+
+	R.ServeHTTP(w, req)
+	assert.Equal(t, 200, w.Code)
+
+	response := serializer.Response{}
+	_ = json.Unmarshal(w.Body.Bytes(), &response)
+
+	orderStatus := OrderStatus{}
+	_ = gconv.Struct(response.Data, &orderStatus)
+
+	assert.Equal(t, orderId, orderStatus.OrderId)
 	assert.Equal(t, int(service.WaitDeliver), orderStatus.OrderStatus)
 	assert.Equal(t, "2019-08-30 16:37:36", orderStatus.CreatedTime)
 	assert.Equal(t, "2019-08-30 16:39:30", orderStatus.PayTime)
@@ -146,10 +225,14 @@ func TestGetPaidOrderInfo(t *testing.T) {
 }
 
 func TestGetPaidOrderInfo_fail_byNoOrderId(t *testing.T) {
-
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/orders/paid_order_info?orderId=", nil)
 	//cookie, err := req.Cookie("user")
+
+	header := http.Header{}
+	header.Add("headerUserId", userId)
+	header.Add("headerUserToken", *tokenImooc)
+	req.Header = header
 
 	R.ServeHTTP(w, req)
 	assert.Equal(t, 400, w.Code)
@@ -162,10 +245,9 @@ func TestGetPaidOrderInfo_fail_byNoOrderId(t *testing.T) {
 	assert.Equal(t, "Key: 'QueryPaidOrderInfoRequest.OrderId' Error:Field validation for 'OrderId' failed on the 'required' tag", response.Error)
 }
 
-func TestCreateOrder_shouldBeFail_noCookie(t *testing.T) {
-
+func TestCreateOrder_shouldBeFail_needToLogin(t *testing.T) {
 	request := service.CreateOrderRequest{
-		UserId:      "19120779W7TK6800",
+		UserId:      userIdLeosanqing,
 		ItemSpecIds: "4",
 		AddressId:   "1330758824650346496",
 		PayMethod:   service.WxPay,
@@ -183,15 +265,42 @@ func TestCreateOrder_shouldBeFail_noCookie(t *testing.T) {
 	response := serializer.Response{}
 	_ = json.Unmarshal(w.Body.Bytes(), &response)
 
+	assert.Equal(t, serializer.CodeCheckLogin, response.Status)
+}
+
+func TestCreateOrder_shouldBeFail_noCookie(t *testing.T) {
+	request := service.CreateOrderRequest{
+		UserId:      userIdLeosanqing,
+		ItemSpecIds: "4",
+		AddressId:   "1330758824650346496",
+		PayMethod:   service.WxPay,
+	}
+
+	marshal, _ := json.Marshal(request)
+
+	fmt.Println(request)
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/api/v1/orders/create", NewBuffer(marshal))
+
+	header := http.Header{}
+	header.Add("headerUserId", userIdLeosanqing)
+	header.Add("headerUserToken", *tokenLeosanqing)
+	req.Header = header
+
+	R.ServeHTTP(w, req)
+	assert.Equal(t, 200, w.Code)
+
+	response := serializer.Response{}
+	_ = json.Unmarshal(w.Body.Bytes(), &response)
+
 	assert.Equal(t, 500, response.Status)
 	assert.Equal(t, "参数错误", response.Msg)
 	assert.Equal(t, "获取购物车信息失败", response.Error)
 }
 
 func TestCreateOrder(t *testing.T) {
-
 	request := service.CreateOrderRequest{
-		UserId:      "19120779W7TK6800",
+		UserId:      userIdLeosanqing,
 		ItemSpecIds: "4",
 		AddressId:   "1330758824650346496",
 		PayMethod:   service.WxPay,
