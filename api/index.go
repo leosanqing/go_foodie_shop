@@ -59,7 +59,6 @@ func QueryCarousel(c *gin.Context) {
 func Cats(c *gin.Context) {
 	var indexService = service.IndexService{}
 	if err := c.ShouldBind(&indexService); err == nil {
-
 		// 先查询 redis ，如果redis 没有数据则去数据库查询
 		catJsonStr := cache.RedisClient.Get(cache.CatsKey).Val()
 		log.ServiceLog.Info("查询 redis 中的 一级分类信息", zap.String(cache.CatsKey, catJsonStr))
@@ -93,7 +92,7 @@ func Cats(c *gin.Context) {
 func SubCats(c *gin.Context) {
 	var indexService = service.QueryItemByIdRequest{}
 	if err := c.ShouldBindUri(&indexService); err == nil {
-		subCatJsonStr := cache.RedisClient.Get(cache.SubCatKey).Val()
+		subCatJsonStr := cache.RedisClient.Get(cache.SubCatKey + indexService.RootCatId).Val()
 		log.ServiceLog.Info("查询 redis 中的 二级分类信息", zap.String(cache.SubCatKey, subCatJsonStr))
 
 		var subCats []model.CategoryVO

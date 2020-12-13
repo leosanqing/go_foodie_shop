@@ -3,9 +3,7 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"go-foodie-shop/configs"
-	"go-foodie-shop/model"
 	"go-foodie-shop/serializer"
 	validator "gopkg.in/go-playground/validator.v8"
 )
@@ -15,14 +13,14 @@ const (
 )
 
 // CurrentUser 获取当前用户
-func CurrentUser(c *gin.Context) *model.Users {
-	if user, _ := c.Get("user"); user != nil {
-		if u, ok := user.(*model.Users); ok {
-			return u
-		}
-	}
-	return nil
-}
+//func CurrentUser(c *gin.Context) *model.Users {
+//	if user, _ := c.Get("user"); user != nil {
+//		if u, ok := user.(*model.Users); ok {
+//			return u
+//		}
+//	}
+//	return nil
+//}
 
 // ErrorResponse 返回错误消息
 func ErrorResponse(err error) serializer.Response {

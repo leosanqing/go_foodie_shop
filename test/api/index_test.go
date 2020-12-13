@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/gogf/gf/util/gconv"
 	"github.com/stretchr/testify/assert"
+	"go-foodie-shop/cache"
 	"go-foodie-shop/model"
 	"go-foodie-shop/serializer"
 	"net/http"
@@ -11,8 +12,13 @@ import (
 	"testing"
 )
 
-func TestQueryCarousel(t *testing.T) {
+func TestQueryCarousel_withoutRedis(t *testing.T) {
+	cache.RedisClient.Del(cache.CarouselKey)
+	TestQueryCarousel(t)
+	assert.NotEmpty(t, cache.RedisClient.Get(cache.CarouselKey).Val())
+}
 
+func TestQueryCarousel(t *testing.T) {
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/index/carousel", nil)
 	//cookie, err := req.Cookie("user")
@@ -56,8 +62,28 @@ func TestQueryCats(t *testing.T) {
 	}
 }
 
-func TestQuerySubCats(t *testing.T) {
+func TestQueryCats_withoutRedis(t *testing.T) {
+	cache.RedisClient.Del(cache.CatsKey)
+	TestQueryCats(t)
+	assert.NotEmpty(t, cache.RedisClient.Get(cache.CatsKey).Val())
+}
 
+func TestQuerySubCats_withoutRedis(t *testing.T) {
+	cache.RedisClient.Del(cache.SubCatKey + "1")
+	TestQuerySubCats(t)
+	assert.NotEmpty(t, cache.RedisClient.Get(cache.SubCatKey+"1").Val())
+}
+
+func TestQuerySubCats_fail_byTooLongId(t *testing.T) {
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/api/v1/index/subCat/1234234324234234234234234234234234234234234234234", nil)
+	//cookie, err := req.Cookie("user")
+	R.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+func TestQuerySubCats(t *testing.T) {
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/index/subCat/1", nil)
 	//cookie, err := req.Cookie("user")
@@ -94,7 +120,6 @@ func TestQuerySubCats(t *testing.T) {
 }
 
 func TestSixNewItems(t *testing.T) {
-
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/index/sixNewItems/1", nil)
 	//cookie, err := req.Cookie("user")
@@ -116,4 +141,22 @@ func TestSixNewItems(t *testing.T) {
 	assert.Equal(t, "cake-1005", sixItems[0].SimpleItemList[0].ItemId)
 	assert.Equal(t, "【天天吃货】进口美食凤梨酥", sixItems[0].SimpleItemList[0].ItemName)
 	assert.Equal(t, "http://122.152.205.72:88/foodie/cake-1005/img1.png", sixItems[0].SimpleItemList[0].ItemUrl)
+}
+
+func TestSixNewItems_fail_byWithoutId(t *testing.T) {
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/api/v1/index/sixNewItems/", nil)
+	//cookie, err := req.Cookie("user")
+	R.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
+}
+
+func TestSixNewItems_fail_byTooLongId(t *testing.T) {
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/api/v1/index/sixNewItems/42343242342342342343242342342342323333", nil)
+	//cookie, err := req.Cookie("user")
+	R.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
