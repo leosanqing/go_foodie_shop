@@ -2,6 +2,7 @@ package api
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -9,13 +10,18 @@ import (
 	"go-foodie-shop/cache"
 	"go-foodie-shop/model"
 	"go-foodie-shop/server"
+	"go-foodie-shop/service"
 	"io"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"testing"
 )
 
 // 链接单例
 var R *gin.Engine
+
+const userId = "1908189H7TNWDTXP"
 
 func Setup() {
 	// DB 配置
@@ -37,6 +43,7 @@ func Setup() {
 func TestMain(m *testing.M) {
 	Setup()
 	fmt.Println("=====begin test======")
+	Login()
 	code := m.Run() // 如果不加这句，只会执行Main
 	os.Exit(code)
 }
@@ -44,6 +51,17 @@ func TestMain(m *testing.M) {
 func NewBufferString(body string) io.Reader {
 	return bytes.NewBufferString(body)
 }
+
 func NewBuffer(body []byte) io.Reader {
 	return bytes.NewBuffer(body)
+}
+
+func Login() {
+	marshal, _ := json.Marshal(&service.LoginRequest{
+		Username: "imooc123",
+		Password: "123456",
+	})
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/api/v1/passport/login", NewBuffer(marshal))
+	R.ServeHTTP(w, req)
 }

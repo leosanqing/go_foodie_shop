@@ -5,6 +5,7 @@ import (
 	"github.com/gogf/gf/util/gconv"
 	"github.com/stretchr/testify/assert"
 	"go-foodie-shop/api"
+	"go-foodie-shop/cache"
 	"go-foodie-shop/model"
 	"go-foodie-shop/serializer"
 	"go-foodie-shop/service"
@@ -20,9 +21,14 @@ type UserAddressBO struct {
 }
 
 func TestQueryAllAddress(t *testing.T) {
+	token := cache.RedisClient.Get(cache.RedisUserToken + userId).Val()
 
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/api/v1/address/list?userId=1908189H7TNWDTXP", http.NoBody)
+	req, _ := http.NewRequest("GET", "/api/v1/address/list?userId="+userId, http.NoBody)
+	header := http.Header{}
+	header.Add("headerUserId", userId)
+	header.Add("headerUserToken", token)
+	req.Header = header
 	R.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
@@ -51,6 +57,19 @@ func TestQueryAllAddress(t *testing.T) {
 	assert.Equal(t, "123213", firstItem.Extend)
 	assert.Equal(t, 1, firstItem.IsDefault)
 	assert.Equal(t, "2019-08-25 17:34:14", firstItem.CreatedTime)
+}
+
+func TestQueryAllAddress_shouldErr_notLogin(t *testing.T) {
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/api/v1/address/list?userId=1908189H7TNWDTXP", http.NoBody)
+	R.ServeHTTP(w, req)
+
+	assert.Equal(t, 200, w.Code)
+
+	var res serializer.Response
+	_ = json.Unmarshal(w.Body.Bytes(), &res)
+	assert.Equal(t, serializer.CodeCheckLogin, res.Status)
 }
 
 func TestAddAddress(t *testing.T) {
