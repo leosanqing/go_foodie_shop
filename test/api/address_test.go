@@ -5,7 +5,6 @@ import (
 	"github.com/gogf/gf/util/gconv"
 	"github.com/stretchr/testify/assert"
 	"go-foodie-shop/api"
-	"go-foodie-shop/cache"
 	"go-foodie-shop/model"
 	"go-foodie-shop/serializer"
 	"go-foodie-shop/service"
@@ -21,13 +20,12 @@ type UserAddressBO struct {
 }
 
 func TestQueryAllAddress(t *testing.T) {
-	token := cache.RedisClient.Get(cache.RedisUserToken + userId).Val()
-
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/address/list?userId="+userId, http.NoBody)
+
 	header := http.Header{}
 	header.Add("headerUserId", userId)
-	header.Add("headerUserToken", token)
+	header.Add("headerUserToken", *token)
 	req.Header = header
 	R.ServeHTTP(w, req)
 
@@ -60,9 +58,31 @@ func TestQueryAllAddress(t *testing.T) {
 }
 
 func TestQueryAllAddress_shouldErr_notLogin(t *testing.T) {
-
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/address/list?userId=1908189H7TNWDTXP", http.NoBody)
+	R.ServeHTTP(w, req)
+
+	assert.Equal(t, 200, w.Code)
+
+	var res serializer.Response
+	_ = json.Unmarshal(w.Body.Bytes(), &res)
+	assert.Equal(t, serializer.CodeCheckLogin, res.Status)
+}
+
+func TestAddAddress_shouldErr_byNoAuth(t *testing.T) {
+	addAddressRequest := service.AddAddressRequest{
+		UserId:   "1908189H7TNWDTXP",
+		Receiver: "test",
+		Mobile:   "15321341111",
+		Province: "北京",
+		City:     "北京",
+		District: "东城区",
+		Detail:   "test111111",
+	}
+
+	marshal, _ := json.Marshal(&addAddressRequest)
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/api/v1/address/add", NewBuffer(marshal))
 	R.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
@@ -88,9 +108,16 @@ func TestAddAddress(t *testing.T) {
 		Receiver: addAddressRequest.Receiver,
 		Detail:   addAddressRequest.Detail,
 	}
+
 	marshal, _ := json.Marshal(&addAddressRequest)
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "/api/v1/address/add", NewBuffer(marshal))
+
+	header := http.Header{}
+	header.Add("headerUserId", userId)
+	header.Add("headerUserToken", *token)
+	req.Header = header
+
 	R.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
@@ -101,9 +128,9 @@ func TestAddAddress(t *testing.T) {
 
 	// 删除数据
 	defer func() {
-		err := model.DB.Model(&model.UserAddress{}).
-			Where(&userAddress).
-			Delete(&userAddress).
+		err := model.DB.
+			Where("receiver = ? AND user_id = ?", userAddress.Receiver, userId).
+			Delete(model.UserAddress{}).
 			Error
 		assert.Empty(t, err)
 	}()
@@ -114,5 +141,4 @@ func TestAddAddress(t *testing.T) {
 		Error
 
 	assert.Empty(t, err)
-
 }
