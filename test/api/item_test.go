@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/gogf/gf/util/gconv"
 	"github.com/stretchr/testify/assert"
+	"go-foodie-shop/api"
 	"go-foodie-shop/model"
 	"go-foodie-shop/serializer"
 	"go-foodie-shop/util"
@@ -19,20 +20,21 @@ func TestItemInfo(t *testing.T) {
 	//cookie, err := req.Cookie("user")
 	R.ServeHTTP(w, req)
 
-	assert.Equal(t, 200, w.Code)
+	assert.Equal(t, http.StatusOK, w.Code)
 
 	var res serializer.Response
 	var infoVO model.ItemInfoVO
 	_ = json.Unmarshal(w.Body.Bytes(), &res)
+	assert.Equal(t, api.Success, res.Status)
 	_ = gconv.Struct(res.Data, &infoVO)
 
-	assert.Equal(t, "bingan-1001", infoVO.Item.Id)
-	assert.Equal(t, "【天天吃货】彩虹马卡龙 下午茶 美眉最爱", infoVO.Item.ItemName)
-	assert.Equal(t, 51, infoVO.Item.CatId)
-	assert.Equal(t, 2, infoVO.Item.RootCatId)
-
-	assert.Equal(t, "bingan-1001", infoVO.ItemParam.ItemId)
-	assert.Equal(t, "bingan-1001-param", infoVO.ItemParam.Id)
+	//assert.Equal(t, "bingan-1001", infoVO.Item.Id)
+	//assert.Equal(t, "【天天吃货】彩虹马卡龙 下午茶 美眉最爱", infoVO.Item.ItemName)
+	//assert.Equal(t, 51, infoVO.Item.CatId)
+	//assert.Equal(t, 2, infoVO.Item.RootCatId)
+	//
+	//assert.Equal(t, "bingan-1001", infoVO.ItemParam.ItemId)
+	//assert.Equal(t, "bingan-1001-param", infoVO.ItemParam.Id)
 	//
 	//itemImgList := infoVO.ItemImgList
 	//assert.Equal(t, 2, len(itemImgList))

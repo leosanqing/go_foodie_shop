@@ -14,14 +14,6 @@ const (
 	Success = 200
 )
 
-// Ping 状态检查页面
-func Ping(c *gin.Context) {
-	c.JSON(200, serializer.Response{
-		Status: 0,
-		Msg:    "Pong",
-	})
-}
-
 // CurrentUser 获取当前用户
 func CurrentUser(c *gin.Context) *model.Users {
 	if user, _ := c.Get("user"); user != nil {
