@@ -19,9 +19,17 @@ import (
 )
 
 // 链接单例
-var R *gin.Engine
+var (
+	R               *gin.Engine
+	tokenImooc      *string
+	tokenLeosanqing *string
+)
 
-const userId = "1908189H7TNWDTXP"
+const (
+	userId            = "1908189H7TNWDTXP"
+	userIdLeosanqing  = "19120779W7TK6800"
+	orderIdLeosanqing = "191215AN25128BR4"
+)
 
 func Setup() {
 	// DB 配置
@@ -43,7 +51,12 @@ func Setup() {
 func TestMain(m *testing.M) {
 	Setup()
 	fmt.Println("=====begin test======")
-	Login()
+	Login("imooc123", "123456")
+	tokenStr := cache.RedisClient.Get(cache.RedisUserToken + userId).Val()
+	tokenImooc = &tokenStr
+	Login("leosanqing", "123456")
+	tokenStr2 := cache.RedisClient.Get(cache.RedisUserToken + userIdLeosanqing).Val()
+	tokenLeosanqing = &tokenStr2
 	code := m.Run() // 如果不加这句，只会执行Main
 	os.Exit(code)
 }
@@ -56,10 +69,10 @@ func NewBuffer(body []byte) io.Reader {
 	return bytes.NewBuffer(body)
 }
 
-func Login() {
+func Login(username, password string) {
 	marshal, _ := json.Marshal(&service.LoginRequest{
-		Username: "imooc123",
-		Password: "123456",
+		Username: username,
+		Password: password,
 	})
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "/api/v1/passport/login", NewBuffer(marshal))

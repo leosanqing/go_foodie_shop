@@ -30,7 +30,7 @@ func TestQueryUserInfo(t *testing.T) {
 	//cookie, err := req.Cookie("user")
 	header := http.Header{}
 	header.Add("headerUserId", userId)
-	header.Add("headerUserToken", *token)
+	header.Add("headerUserToken", *tokenImooc)
 	req.Header = header
 	R.ServeHTTP(w, req)
 
@@ -64,8 +64,6 @@ func TestQueryUserInfo_shouldErr_byNoAuth(t *testing.T) {
 
 func TestUpdateUserInfo(t *testing.T) {
 	Login("leosanqing", "123456")
-	userId := "19120779W7TK6800"
-	token := cache.RedisClient.Get(cache.RedisUserToken + userId).Val()
 	w := httptest.NewRecorder()
 	runes := util.RandStringRunes(2)
 	realName := "leo" + runes
@@ -78,11 +76,12 @@ func TestUpdateUserInfo(t *testing.T) {
 		Email:    email,
 	})
 
-	req, _ := http.NewRequest("POST", "/api/v1/userInfo/update?userId="+userId, NewBuffer(marshal))
+	req, _ := http.NewRequest("POST", "/api/v1/userInfo/update?userId="+userIdLeosanqing, NewBuffer(marshal))
 	//cookie, err := req.Cookie("user")
 	header := http.Header{}
-	header.Add("headerUserId", userId)
-	header.Add("headerUserToken", token)
+	header.Add("headerUserId", userIdLeosanqing)
+	*tokenLeosanqing = cache.RedisClient.Get(cache.RedisUserToken + userIdLeosanqing).Val()
+	header.Add("headerUserToken", *tokenLeosanqing)
 	req.Header = header
 
 	R.ServeHTTP(w, req)
@@ -95,7 +94,7 @@ func TestUpdateUserInfo(t *testing.T) {
 	var users Users
 	_ = gconv.Struct(res.Data, &users)
 
-	assert.Equal(t, userId, users.Id)
+	assert.Equal(t, userIdLeosanqing, users.Id)
 	assert.Equal(t, realName, users.Realname)
 	assert.Equal(t, nickName, users.Nickname)
 	assert.Equal(t, email, users.Email)
@@ -144,7 +143,7 @@ func TestUploadFace(t *testing.T) {
 	//cookie, err := req.Cookie("user")
 	header := http.Header{}
 	header.Add("headerUserId", userId)
-	header.Add("headerUserToken", *token)
+	header.Add("headerUserToken", *tokenImooc)
 	req.Header = header
 
 	R.ServeHTTP(w, req)

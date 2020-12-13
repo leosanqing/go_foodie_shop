@@ -25,7 +25,7 @@ func TestQueryAllAddress(t *testing.T) {
 
 	header := http.Header{}
 	header.Add("headerUserId", userId)
-	header.Add("headerUserToken", *token)
+	header.Add("headerUserToken", *tokenImooc)
 	req.Header = header
 	R.ServeHTTP(w, req)
 
@@ -115,7 +115,7 @@ func TestAddAddress(t *testing.T) {
 
 	header := http.Header{}
 	header.Add("headerUserId", userId)
-	header.Add("headerUserToken", *token)
+	header.Add("headerUserToken", *tokenImooc)
 	req.Header = header
 
 	R.ServeHTTP(w, req)
