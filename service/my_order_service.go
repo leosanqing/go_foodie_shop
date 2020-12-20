@@ -279,7 +279,10 @@ func validateUserOrder(orderId, userId string) error {
 		UserId:   userId,
 		IsDelete: 0,
 	}
-	return model.DB.First(&order).Error
+	return model.DB.
+		Where(&order).
+		First(&order).
+		Error
 }
 
 func (r *ConfirmReceiverRequest) DeleteOrder() error {

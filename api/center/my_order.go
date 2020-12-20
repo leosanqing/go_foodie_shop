@@ -44,10 +44,10 @@ func QueryTrend(c *gin.Context) {
 	}
 }
 
-// StatusCounts 查询用户订单数
+// StatusCounts 查询用户订单  不同状态下的数量
 func StatusCounts(c *gin.Context) {
 	var queryTrendRequest = service.QueryStatusCountsRequest{}
-	if err := c.ShouldBind(&queryTrendRequest); err == nil {
+	if err := c.ShouldBindQuery(&queryTrendRequest); err == nil {
 		myOrders, err := queryTrendRequest.QueryOrderStatus()
 		if err != nil {
 			c.JSON(http.StatusOK, api.ErrorResponse(err))

@@ -349,3 +349,134 @@ func TestCreateOrder(t *testing.T) {
 	//assert.Equal(t,"参数错误",response.Msg)
 	//assert.Equal(t,"Key: 'QueryPaidOrderInfoRequest.OrderId' Error:Field validation for 'OrderId' failed on the 'required' tag",response.Error)
 }
+
+func TestStatusCounts_fail_notLogin(t *testing.T) {
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/api/v1/my_orders/status_counts?userId="+userId, http.NoBody)
+	R.ServeHTTP(w, req)
+
+	var res serializer.Response
+	_ = json.Unmarshal(w.Body.Bytes(), &res)
+	assert.Equal(t, serializer.CodeCheckLogin, res.Status)
+}
+
+func TestStatusCounts_fail_userIdEmpty(t *testing.T) {
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/api/v1/my_orders/status_counts?userId=", http.NoBody)
+
+	header := http.Header{}
+	header.Add("headerUserId", userId)
+	header.Add("headerUserToken", *tokenImooc)
+	req.Header = header
+
+	R.ServeHTTP(w, req)
+
+	var res serializer.Response
+	_ = json.Unmarshal(w.Body.Bytes(), &res)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+func TestStatusCounts(t *testing.T) {
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/api/v1/my_orders/status_counts?userId="+userId, http.NoBody)
+
+	header := http.Header{}
+	header.Add("headerUserId", userId)
+	header.Add("headerUserToken", *tokenImooc)
+	req.Header = header
+
+	R.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var res serializer.Response
+	_ = json.Unmarshal(w.Body.Bytes(), &res)
+
+	var status model.OrderStatusCountsVO
+	_ = gconv.Struct(res.Data, &status)
+
+	assert.Equal(t, int64(1), status.WaitPayCounts)
+	assert.Equal(t, int64(11), status.WaitDeliverCounts)
+	assert.Equal(t, int64(0), status.WaitCommentCounts)
+	assert.Equal(t, int64(0), status.WaitReceiveCounts)
+}
+
+func TestConfirmReceiver(t *testing.T) {
+	orderId := "191215AZ9HXM6GF8"
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/api/v1/my_orders/confirm_receive?userId="+userIdLeosanqing+"&orderId="+orderId, http.NoBody)
+
+	header := http.Header{}
+	header.Add("headerUserId", userIdLeosanqing)
+	header.Add("headerUserToken", *tokenLeosanqing)
+	req.Header = header
+
+	R.ServeHTTP(w, req)
+
+	var res serializer.Response
+	_ = json.Unmarshal(w.Body.Bytes(), &res)
+
+	assert.Equal(t, api.Success, res.Status)
+
+	status := model.OrderStatus{OrderId: orderId}
+	err := model.DB.
+		Find(&status).
+		Error
+	assert.Empty(t, err)
+	assert.Equal(t, 40, status.OrderStatus)
+
+	status.OrderStatus = 30
+	err = model.DB.Model(&model.OrderStatus{}).
+		Update(&status).
+		Error
+	assert.Empty(t, err)
+}
+
+func TestConfirmReceiver_fail_orderNotBelongToUser(t *testing.T) {
+	orderId := "190830BW77HM55KP"
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/api/v1/my_orders/confirm_receive?userId="+userIdLeosanqing+"&orderId="+orderId, http.NoBody)
+
+	header := http.Header{}
+	header.Add("headerUserId", userIdLeosanqing)
+	header.Add("headerUserToken", *tokenLeosanqing)
+	req.Header = header
+
+	R.ServeHTTP(w, req)
+
+	var res serializer.Response
+	_ = json.Unmarshal(w.Body.Bytes(), &res)
+
+	assert.Equal(t, 500, res.Status)
+}
+
+func TestConfirmReceiver_fail_userIdEmpty(t *testing.T) {
+	orderId := "190830BW77HM55KP"
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/api/v1/my_orders/confirm_receive?userId="+"&orderId="+orderId, http.NoBody)
+
+	header := http.Header{}
+	header.Add("headerUserId", userIdLeosanqing)
+	header.Add("headerUserToken", *tokenLeosanqing)
+	req.Header = header
+
+	R.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+func TestConfirmReceiver_fail_notLogin(t *testing.T) {
+	orderId := "190830BW77HM55KP"
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/api/v1/my_orders/confirm_receive?userId="+userIdLeosanqing+"&orderId="+orderId, http.NoBody)
+	R.ServeHTTP(w, req)
+
+	var res serializer.Response
+	_ = json.Unmarshal(w.Body.Bytes(), &res)
+
+	assert.Equal(t, serializer.CodeCheckLogin, res.Status)
+}
