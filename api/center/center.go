@@ -8,6 +8,7 @@ import (
 	"go-foodie-shop/serializer"
 	"go-foodie-shop/service"
 	"go.uber.org/zap"
+	"net/http"
 )
 
 // QueryUserInfo 查询用户信息
@@ -21,13 +22,13 @@ func QueryUserInfo(c *gin.Context) {
 				zap.String("userId", userInfoRequest.UserId),
 				zap.Error(err),
 			)
-			c.JSON(200, api.ErrorResponse(errors.New("查询用户信息失败")))
+			c.JSON(http.StatusOK, serializer.DBErr("查询用户信息失败", err))
 			return
 		}
 		log.ServiceLog.Info("查询用户信息成功", zap.Any("userInfo", userInfo))
-		c.JSON(200, api.SuccessResponse(userInfo))
+		c.JSON(http.StatusOK, api.SuccessResponse(userInfo))
 	} else {
-		c.JSON(400, api.ErrorResponse(err))
+		c.JSON(http.StatusBadRequest, api.ErrorResponse(err))
 	}
 }
 
@@ -45,14 +46,14 @@ func UpdateUserInfo(c *gin.Context) {
 				zap.Any("userInfo", userInfo),
 				zap.Error(err),
 			)
-			c.JSON(200, api.ErrorResponse(errors.New("更新用户信息失败")))
+			c.JSON(http.StatusOK, api.ErrorResponse(errors.New("更新用户信息失败")))
 			return
 		}
 		log.ServiceLog.Info("更新用户信息成功", zap.Any("userInfo", userInfo))
 
-		c.JSON(200, api.SuccessResponse(userInfo))
+		c.JSON(http.StatusOK, api.SuccessResponse(userInfo))
 	} else {
-		c.JSON(400, api.ErrorResponse(err))
+		c.JSON(http.StatusBadRequest, api.ErrorResponse(err))
 	}
 }
 
@@ -61,7 +62,7 @@ func UploadFace(c *gin.Context) {
 	if err := c.ShouldBind(&uploadFaceRequest); err == nil {
 		userId := c.Query("userId")
 		if "" == userId {
-			c.JSON(400, api.ErrorResponse(errors.New("userId 不能为空")))
+			c.JSON(http.StatusBadRequest, api.ErrorResponse(errors.New("userId 不能为空")))
 			return
 		}
 
@@ -70,18 +71,15 @@ func UploadFace(c *gin.Context) {
 		if err != nil {
 			log.ServiceLog.Error(
 				"用户上传头像失败",
-				zap.Any("userId", uploadFaceRequest.UserId),
+				zap.String("userId", uploadFaceRequest.UserId),
 				zap.Error(err),
 			)
-			c.JSON(200, api.ErrorResponse(errors.New("上传头像失败")))
+			c.JSON(http.StatusOK, api.ErrorResponse(errors.New("上传头像失败")))
 			return
 		}
 		log.ServiceLog.Info("用户上传头像成功", zap.Any("userInfo", userInfo))
-		c.JSON(200, serializer.Response{
-			Status: 200,
-			Data:   userInfo,
-		})
+		c.JSON(http.StatusOK, api.SuccessResponse(userInfo))
 	} else {
-		c.JSON(400, api.ErrorResponse(err))
+		c.JSON(http.StatusBadRequest, api.ErrorResponse(err))
 	}
 }

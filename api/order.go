@@ -8,6 +8,7 @@ import (
 	"go-foodie-shop/serializer"
 	"go-foodie-shop/service"
 	"go.uber.org/zap"
+	"net/http"
 )
 
 func CreateOrder(c *gin.Context) {
@@ -20,7 +21,7 @@ func CreateOrder(c *gin.Context) {
 				"获取购物车信息失败",
 				zap.Error(err),
 			)
-			c.JSON(200, ErrorResponse(errors.New("获取购物车信息失败")))
+			c.JSON(http.StatusOK, ErrorResponse(errors.New("获取购物车信息失败")))
 			return
 		}
 
@@ -37,14 +38,14 @@ func CreateOrder(c *gin.Context) {
 				"解析购物车Json异常",
 				zap.Error(err),
 			)
-			c.JSON(200, ErrorResponse(errors.New("解析购物车Json异常")))
+			c.JSON(http.StatusOK, ErrorResponse(errors.New("解析购物车Json异常")))
 			return
 		}
 
 		// 1.创建订单
 		orderVO, err := registerService.CreateOrder(shopCartBOS)
 		if err != nil {
-			c.JSON(200, ErrorResponse(err))
+			c.JSON(http.StatusOK, ErrorResponse(err))
 			return
 		}
 
@@ -77,9 +78,9 @@ func CreateOrder(c *gin.Context) {
 			zap.String("shopCartCookie", string(jsonStr)),
 		)
 		// 2.创建订单以后，移除购物车中已结算的商品
-		c.JSON(200, serializer.Response{Status: Success, Data: orderVO.OrderId})
+		c.JSON(http.StatusOK, serializer.Response{Status: Success, Data: orderVO.OrderId})
 	} else {
-		c.JSON(400, ErrorResponse(err))
+		c.JSON(http.StatusBadRequest, ErrorResponse(err))
 	}
 }
 
@@ -89,11 +90,11 @@ func GetPaidOrderInfo(c *gin.Context) {
 	if err := c.ShouldBindQuery(&orderInfoRequest); err == nil {
 		info, err := orderInfoRequest.QueryPaidOrderInfo()
 		if err != nil {
-			c.JSON(200, ErrorResponse(err))
+			c.JSON(http.StatusOK, ErrorResponse(err))
 			return
 		}
-		c.JSON(200, serializer.Response{Status: Success, Data: info})
+		c.JSON(http.StatusOK, SuccessResponse(info))
 	} else {
-		c.JSON(400, ErrorResponse(err))
+		c.JSON(http.StatusBadRequest, ErrorResponse(err))
 	}
 }

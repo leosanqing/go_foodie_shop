@@ -186,7 +186,7 @@ func (r *QueryItemByIdRequest) QuerySixNewItems() serializer.Response {
 
 	if err != nil {
 		return serializer.Response{
-			Status: 400,
+			Status: 200,
 			Data:   nil,
 			Msg:    "查询子分类异常",
 		}

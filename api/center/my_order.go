@@ -3,9 +3,9 @@ package center
 import (
 	"github.com/gin-gonic/gin"
 	"go-foodie-shop/api"
-	"go-foodie-shop/serializer"
 	"go-foodie-shop/service"
 	"go-foodie-shop/util"
+	"net/http"
 )
 
 // QueryMyOrders 查询我的订单
@@ -16,16 +16,13 @@ func QueryMyOrders(c *gin.Context) {
 		result := util.PagedGridResult(myOrders, count, queryMyOrderRequest.Page.Page, queryMyOrderRequest.PageSize)
 
 		if err != nil {
-			c.JSON(200, api.ErrorResponse(err))
+			c.JSON(http.StatusOK, api.ErrorResponse(err))
 			return
 		}
 
-		c.JSON(200, serializer.Response{
-			Status: 200,
-			Data:   result,
-		})
+		c.JSON(http.StatusOK, api.SuccessResponse(result))
 	} else {
-		c.JSON(400, api.ErrorResponse(err))
+		c.JSON(http.StatusBadRequest, api.ErrorResponse(err))
 	}
 }
 
@@ -37,16 +34,13 @@ func QueryTrend(c *gin.Context) {
 		result := util.PagedGridResult(myOrders, count, queryTrendRequest.Page.Page, queryTrendRequest.PageSize)
 
 		if err != nil {
-			c.JSON(200, api.ErrorResponse(err))
+			c.JSON(http.StatusOK, api.ErrorResponse(err))
 			return
 		}
 
-		c.JSON(200, serializer.Response{
-			Status: 200,
-			Data:   result,
-		})
+		c.JSON(http.StatusOK, api.SuccessResponse(result))
 	} else {
-		c.JSON(400, api.ErrorResponse(err))
+		c.JSON(http.StatusBadRequest, api.ErrorResponse(err))
 	}
 }
 
@@ -56,16 +50,13 @@ func StatusCounts(c *gin.Context) {
 	if err := c.ShouldBind(&queryTrendRequest); err == nil {
 		myOrders, err := queryTrendRequest.QueryOrderStatus()
 		if err != nil {
-			c.JSON(200, api.ErrorResponse(err))
+			c.JSON(http.StatusOK, api.ErrorResponse(err))
 			return
 		}
 
-		c.JSON(200, serializer.Response{
-			Status: 200,
-			Data:   myOrders,
-		})
+		c.JSON(http.StatusOK, api.SuccessResponse(myOrders))
 	} else {
-		c.JSON(400, api.ErrorResponse(err))
+		c.JSON(http.StatusBadRequest, api.ErrorResponse(err))
 	}
 }
 
@@ -75,15 +66,13 @@ func Deliver(c *gin.Context) {
 	if err := c.ShouldBindQuery(&deliverRequest); err == nil {
 		err := deliverRequest.UpdateDeliverOrderStatus()
 		if err != nil {
-			c.JSON(200, api.ErrorResponse(err))
+			c.JSON(http.StatusOK, api.ErrorResponse(err))
 			return
 		}
 
-		c.JSON(200, serializer.Response{
-			Status: 200,
-		})
+		c.JSON(http.StatusOK, api.SuccessResponse(nil))
 	} else {
-		c.JSON(400, api.ErrorResponse(err))
+		c.JSON(http.StatusBadRequest, api.ErrorResponse(err))
 	}
 }
 
@@ -93,15 +82,13 @@ func ConfirmReceiver(c *gin.Context) {
 	if err := c.ShouldBindQuery(&receiverRequest); err == nil {
 		err := receiverRequest.ConfirmReceiver()
 		if err != nil {
-			c.JSON(200, api.ErrorResponse(err))
+			c.JSON(http.StatusOK, api.ErrorResponse(err))
 			return
 		}
 
-		c.JSON(200, serializer.Response{
-			Status: 200,
-		})
+		c.JSON(http.StatusOK, api.SuccessResponse(nil))
 	} else {
-		c.JSON(400, api.ErrorResponse(err))
+		c.JSON(http.StatusBadRequest, api.ErrorResponse(err))
 	}
 }
 
@@ -111,14 +98,12 @@ func DeleteOrder(c *gin.Context) {
 	if err := c.ShouldBindQuery(&receiverRequest); err == nil {
 		err := receiverRequest.DeleteOrder()
 		if err != nil {
-			c.JSON(200, api.ErrorResponse(err))
+			c.JSON(http.StatusOK, api.ErrorResponse(err))
 			return
 		}
 
-		c.JSON(200, serializer.Response{
-			Status: 200,
-		})
+		c.JSON(http.StatusOK, api.SuccessResponse(nil))
 	} else {
-		c.JSON(400, api.ErrorResponse(err))
+		c.JSON(http.StatusBadRequest, api.ErrorResponse(err))
 	}
 }

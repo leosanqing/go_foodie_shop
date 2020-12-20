@@ -9,6 +9,7 @@ import (
 	"go-foodie-shop/serializer"
 	"go-foodie-shop/service"
 	"go.uber.org/zap"
+	"net/http"
 )
 
 const (
@@ -32,24 +33,24 @@ func QueryCarousel(c *gin.Context) {
 			err := json.Unmarshal([]byte(carouselStr), &carouselList)
 			if err != nil {
 				log.ServiceLog.Error("Json 转换异常", zap.String("carouselStr", carouselStr), zap.Error(err))
-				c.JSON(200, serializer.JsonConvertErr(err))
+				c.JSON(http.StatusOK, serializer.JsonConvertErr(err))
 			} else {
-				c.JSON(200, serializer.Response{Status: Success, Data: carouselList})
+				c.JSON(http.StatusOK, SuccessResponse(carouselList))
 			}
 			return
 		}
 
 		carouselList, err := indexService.QueryCarouselList()
 		if err != nil {
-			c.JSON(200, serializer.ParamErr("查询轮播图出错", err))
+			c.JSON(http.StatusOK, serializer.ParamErr("查询轮播图出错", err))
 			return
 		}
 		// 存入 redis
 		marshal, _ := json.Marshal(carouselList)
 		cache.RedisClient.Set(cache.CarouselKey, marshal, Zero)
-		c.JSON(200, SuccessResponse(carouselList))
+		c.JSON(http.StatusOK, SuccessResponse(carouselList))
 	} else {
-		c.JSON(200, ErrorResponse(err))
+		c.JSON(http.StatusBadRequest, ErrorResponse(err))
 	}
 }
 
@@ -58,7 +59,6 @@ func QueryCarousel(c *gin.Context) {
 func Cats(c *gin.Context) {
 	var indexService = service.IndexService{}
 	if err := c.ShouldBind(&indexService); err == nil {
-
 		// 先查询 redis ，如果redis 没有数据则去数据库查询
 		catJsonStr := cache.RedisClient.Get(cache.CatsKey).Val()
 		log.ServiceLog.Info("查询 redis 中的 一级分类信息", zap.String(cache.CatsKey, catJsonStr))
@@ -68,23 +68,23 @@ func Cats(c *gin.Context) {
 			err := json.Unmarshal([]byte(catJsonStr), &cats)
 			if err != nil {
 				log.ServiceLog.Error("Json 转换异常", zap.String("catJsonStr", catJsonStr), zap.Error(err))
-				c.JSON(200, serializer.JsonConvertErr(err))
+				c.JSON(http.StatusOK, serializer.JsonConvertErr(err))
 			} else {
-				c.JSON(200, SuccessResponse(cats))
+				c.JSON(http.StatusOK, SuccessResponse(cats))
 			}
 			return
 		}
 
 		cats, err := indexService.QueryAllRootLevelCats()
 		if err != nil {
-			c.JSON(200, serializer.DBErr("查询一级目录失败", err))
+			c.JSON(http.StatusOK, serializer.DBErr("查询一级目录失败", err))
 			return
 		}
 		marshal, _ := json.Marshal(cats)
 		cache.RedisClient.Set(cache.CatsKey, marshal, Zero)
-		c.JSON(200, SuccessResponse(cats))
+		c.JSON(http.StatusOK, SuccessResponse(cats))
 	} else {
-		c.JSON(400, ErrorResponse(err))
+		c.JSON(http.StatusBadRequest, ErrorResponse(err))
 	}
 }
 
@@ -92,7 +92,7 @@ func Cats(c *gin.Context) {
 func SubCats(c *gin.Context) {
 	var indexService = service.QueryItemByIdRequest{}
 	if err := c.ShouldBindUri(&indexService); err == nil {
-		subCatJsonStr := cache.RedisClient.Get(cache.SubCatKey).Val()
+		subCatJsonStr := cache.RedisClient.Get(cache.SubCatKey + indexService.RootCatId).Val()
 		log.ServiceLog.Info("查询 redis 中的 二级分类信息", zap.String(cache.SubCatKey, subCatJsonStr))
 
 		var subCats []model.CategoryVO
@@ -100,32 +100,32 @@ func SubCats(c *gin.Context) {
 			err := json.Unmarshal([]byte(subCatJsonStr), &subCats)
 			if err != nil {
 				log.ServiceLog.Error("Json 转换异常", zap.String("subCatJsonStr", subCatJsonStr), zap.Error(err))
-				c.JSON(200, serializer.JsonConvertErr(err))
+				c.JSON(http.StatusOK, serializer.JsonConvertErr(err))
 			} else {
-				c.JSON(200, SuccessResponse(subCats))
+				c.JSON(http.StatusOK, SuccessResponse(subCats))
 			}
 			return
 		}
 
 		subCats, err := indexService.QuerySubCats()
 		if err != nil {
-			c.JSON(200, serializer.DBErr("查询子分类异常", err))
+			c.JSON(http.StatusOK, serializer.DBErr("查询子分类异常", err))
 		} else {
 			// 存入 redis
 			marshal, _ := json.Marshal(subCats)
 			cache.RedisClient.Set(cache.SubCatKey+indexService.RootCatId, marshal, Zero)
-			c.JSON(200, SuccessResponse(subCats))
+			c.JSON(http.StatusOK, SuccessResponse(subCats))
 		}
 	} else {
-		c.JSON(400, ErrorResponse(err))
+		c.JSON(http.StatusBadRequest, ErrorResponse(err))
 	}
 }
 
 func GetSixNewItems(c *gin.Context) {
 	var indexService = service.QueryItemByIdRequest{}
 	if err := c.ShouldBindUri(&indexService); err == nil {
-		c.JSON(200, indexService.QuerySixNewItems())
+		c.JSON(http.StatusOK, indexService.QuerySixNewItems())
 	} else {
-		c.JSON(400, ErrorResponse(err))
+		c.JSON(http.StatusBadRequest, ErrorResponse(err))
 	}
 }

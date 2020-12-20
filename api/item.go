@@ -9,6 +9,7 @@ import (
 	"go-foodie-shop/service"
 	"go-foodie-shop/util"
 	"go.uber.org/zap"
+	"net/http"
 )
 
 // ItemInfo 商品详情
@@ -19,7 +20,7 @@ func ItemInfo(c *gin.Context) {
 		items, err := queryItemRequest.QueryItemsById()
 		if err != nil {
 			log.ServiceLog.Error("query Item by Id err id ")
-			c.JSON(200, ErrorResponse(errors.New("查询商品失败")))
+			c.JSON(http.StatusOK, ErrorResponse(errors.New("查询商品失败")))
 			return
 		}
 		itemVO.Item = items
@@ -27,7 +28,7 @@ func ItemInfo(c *gin.Context) {
 		itemImg, err := queryItemRequest.QueryItemsImgById()
 		if err != nil {
 			log.ServiceLog.Error("query ItemImg by Id err id ")
-			c.JSON(200, ErrorResponse(errors.New("查询商品失败")))
+			c.JSON(http.StatusOK, ErrorResponse(errors.New("查询商品失败")))
 			return
 		}
 		itemVO.ItemImgList = itemImg
@@ -35,7 +36,7 @@ func ItemInfo(c *gin.Context) {
 		specs, err := queryItemRequest.QueryItemSpec()
 		if err != nil {
 			log.ServiceLog.Error("query itemSpec by Id err id %s")
-			c.JSON(200, ErrorResponse(errors.New("查询商品规格信息失败")))
+			c.JSON(http.StatusOK, ErrorResponse(errors.New("查询商品规格信息失败")))
 			return
 		}
 		itemVO.ItemSpecList = specs
@@ -47,19 +48,15 @@ func ItemInfo(c *gin.Context) {
 				zap.String("itemId", queryItemRequest.ItemId),
 				zap.Error(err),
 			)
-			c.JSON(200, ErrorResponse(errors.New("查询商品参数信息失败")))
+			c.JSON(http.StatusOK, ErrorResponse(errors.New("查询商品参数信息失败")))
 			return
 		}
 		itemVO.ItemParam = itemParam
 		log.ServiceLog.Info("query itemParam by Id err id ", zap.Any("itemParam", itemVO.ItemParam))
 
-		c.JSON(200, serializer.Response{
-			Status: 200,
-			Data:   itemVO,
-			Msg:    "success",
-		})
+		c.JSON(http.StatusOK, SuccessResponse(itemVO))
 	} else {
-		c.JSON(200, ErrorResponse(err))
+		c.JSON(http.StatusBadRequest, ErrorResponse(err))
 	}
 }
 
@@ -73,19 +70,19 @@ func CommentLevelCounts(c *gin.Context) {
 				zap.String("itemId", commentService.ItemId),
 				zap.Error(err),
 			)
-			c.JSON(200, ErrorResponse(errors.New("查询商品评价失败")))
+			c.JSON(http.StatusOK, ErrorResponse(errors.New("查询商品评价失败")))
 		} else {
 			log.ServiceLog.Info(
 				"查询商品评价成功",
 				zap.Any("commentLevelVO", commentLevelVO),
 			)
-			c.JSON(200, serializer.Response{
+			c.JSON(http.StatusOK, serializer.Response{
 				Status: Success,
 				Data:   commentLevelVO,
 			})
 		}
 	} else {
-		c.JSON(400, ErrorResponse(err))
+		c.JSON(http.StatusBadRequest, ErrorResponse(err))
 	}
 }
 
@@ -99,7 +96,7 @@ func QueryComments(c *gin.Context) {
 				zap.String("itemId", commentService.ItemId),
 				zap.Error(err),
 			)
-			c.JSON(200, ErrorResponse(errors.New("查询商品评价失败")))
+			c.JSON(http.StatusOK, ErrorResponse(errors.New("查询商品评价失败")))
 		} else {
 			log.ServiceLog.Info(
 				"查询商品评价成功",
@@ -110,13 +107,10 @@ func QueryComments(c *gin.Context) {
 				itemCommentVOS[index].Nickname = util.CommonDisplay(itemCommentVOS[index].Nickname)
 			}
 			result := util.PagedGridResult(itemCommentVOS, total, commentService.Page.Page, commentService.PageSize)
-			c.JSON(200, serializer.Response{
-				Status: Success,
-				Data:   result,
-			})
+			c.JSON(http.StatusOK, SuccessResponse(result))
 		}
 	} else {
-		c.JSON(400, ErrorResponse(err))
+		c.JSON(http.StatusBadRequest, ErrorResponse(err))
 	}
 }
 
@@ -130,19 +124,16 @@ func QueryItemsBySpecIds(c *gin.Context) {
 				zap.String("itemSpecIds", shopCartService.ItemSpecIds),
 				zap.Error(err),
 			)
-			c.JSON(200, ErrorResponse(errors.New("查询商品信息失败")))
+			c.JSON(http.StatusOK, ErrorResponse(errors.New("查询商品信息失败")))
 		} else {
 			log.ServiceLog.Info(
 				"查询商品信息成功",
 				zap.Any("shopCartVOS", shopCartVOS),
 			)
 
-			c.JSON(200, serializer.Response{
-				Status: Success,
-				Data:   shopCartVOS,
-			})
+			c.JSON(http.StatusOK, SuccessResponse(shopCartVOS))
 		}
 	} else {
-		c.JSON(400, ErrorResponse(err))
+		c.JSON(http.StatusBadRequest, ErrorResponse(err))
 	}
 }

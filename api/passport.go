@@ -6,6 +6,7 @@ import (
 	"go-foodie-shop/cache"
 	"go-foodie-shop/serializer"
 	"go-foodie-shop/service"
+	"net/http"
 )
 
 // UserRegister 用户注册接口
@@ -14,13 +15,13 @@ func UserRegister(c *gin.Context) {
 	if err := c.ShouldBindJSON(&registerService); err == nil {
 		users, err := registerService.Register(c)
 		if err != nil {
-			c.JSON(200, ErrorResponse(err))
+			c.JSON(http.StatusOK, ErrorResponse(err))
 			return
 		}
 		syncShopCartData(users.Id, c)
-		c.JSON(200, serializer.Response{Status: Success, Data: users})
+		c.JSON(http.StatusOK, serializer.Response{Status: Success, Data: users})
 	} else {
-		c.JSON(400, ErrorResponse(err))
+		c.JSON(http.StatusBadRequest, ErrorResponse(err))
 	}
 }
 
@@ -29,10 +30,10 @@ func UsernameIsExist(c *gin.Context) {
 	username := c.Query("username")
 	err := service.UsernameExist(username)
 	if err != nil {
-		c.JSON(200, serializer.Response{Status: 400, Msg: "用户名已经注册", Error: err.Error()})
+		c.JSON(http.StatusOK, serializer.Response{Status: http.StatusBadRequest, Msg: "用户名已经注册", Error: err.Error()})
 		return
 	}
-	c.JSON(200, serializer.Response{Status: Success})
+	c.JSON(http.StatusOK, serializer.Response{Status: Success})
 }
 
 // UserLogin 用户登录接口
@@ -41,13 +42,13 @@ func UserLogin(c *gin.Context) {
 	if err := c.ShouldBindJSON(&loginService); err == nil {
 		users, err := loginService.Login(c)
 		if err != nil {
-			c.JSON(200, ErrorResponse(err))
+			c.JSON(http.StatusOK, ErrorResponse(err))
 			return
 		}
 		syncShopCartData(users.Id, c)
-		c.JSON(200, serializer.Response{Status: Success, Data: users})
+		c.JSON(http.StatusOK, serializer.Response{Status: Success, Data: users})
 	} else {
-		c.JSON(400, ErrorResponse(err))
+		c.JSON(http.StatusBadRequest, ErrorResponse(err))
 	}
 }
 
@@ -56,11 +57,11 @@ func UserLogout(c *gin.Context) {
 
 	userId, exist := c.GetQuery("userId")
 	if !exist {
-		c.JSON(400, ErrorResponse(errors.New("userId 不能为空")))
+		c.JSON(http.StatusBadRequest, ErrorResponse(errors.New("userId 不能为空")))
 	} else {
 		cache.RedisClient.Del(cache.RedisUserToken + userId)
 		deleteCookie(c)
-		c.JSON(200, SuccessResponse(nil))
+		c.JSON(http.StatusOK, SuccessResponse(nil))
 	}
 
 }
@@ -93,5 +94,4 @@ func syncShopCartData(userId string, c *gin.Context) {
 				false)
 		}
 	}
-
 }

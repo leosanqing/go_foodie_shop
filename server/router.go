@@ -14,6 +14,14 @@ import (
 )
 
 // NewRouter 路由配置
+// 关于路由地址的几点想法
+//	1. 路由地址写法
+//   	a. 有的喜欢使用公共前缀然后拼接上自己的部分路由,有的使用 全路径
+//  	   比如 index := v1.Group("/api/v1/index"){ index.GET("carousel", api.QueryCarousel)}
+//         比如 index := v1.Group(""){ index.GET("/api/v1/index/carousel", api.QueryCarousel)}
+//		   Java 里面也有类似的，比如我们 在 Controller 的上面有时候会标注 公共路由 @RequestMapping("api/v1")
+// 		b. 这两种各有优劣，第一种层次比较清晰简洁，但是不利于搜索；第二种排查问题方便，直接搜索路由就行；
+// 		   我们在项目中leader 比较推荐第二种，这样团队搜索路由很方面，能很快定位。因为这边我也全部改成第二种了
 func NewRouter() *gin.Engine {
 	r := gin.Default()
 
@@ -30,44 +38,44 @@ func NewRouter() *gin.Engine {
 		v.RegisterCustomTypeFunc(advance.ValidateJSONDateType, model.LocalTime{})
 	}
 	// 路由
-	v1 := r.Group("/api/v1")
+	v1 := r.Group("")
 	{
-		index := v1.Group("index")
+		index := v1.Group("")
 		{
 			// 首页轮播图
-			index.GET("carousel", api.QueryCarousel)
+			index.GET("/api/v1/index/carousel", api.QueryCarousel)
 			// 查询分类信息
-			index.GET("cats", api.Cats)
+			index.GET("/api/v1/index/cats", api.Cats)
 			// 查询子分类信息
-			index.GET("subCat/:rootCatId", api.SubCats)
+			index.GET("/api/v1/index/subCat/:rootCatId", api.SubCats)
 			// 根据 分类Id 查询六个商品
-			index.GET("sixNewItems/:rootCatId", api.GetSixNewItems)
+			index.GET("/api/v1/index/sixNewItems/:rootCatId", api.GetSixNewItems)
 		}
 
-		item := v1.Group("items")
+		item := v1.Group("")
 		{
 			// 根据商品Id查询商品信息
-			item.GET("info/:itemId", api.ItemInfo)
+			item.GET("/api/v1/items/info/:itemId", api.ItemInfo)
 			// 查询各等级评论条数
-			item.GET("commentLevel", api.CommentLevelCounts)
+			item.GET("/api/v1/items/commentLevel", api.CommentLevelCounts)
 			// 查询评论信息
-			item.GET("comments", api.QueryComments)
+			item.GET("/api/v1/items/comments", api.QueryComments)
 			// 根据关键字搜索商品
-			item.GET("search", api.SearchItem)
+			item.GET("/api/v1/items/search", api.SearchItem)
 			// 根据 分类Id 搜索商品
-			item.GET("catItems", api.SearchItemByCatId)
+			item.GET("/api/v1/items/catItems", api.SearchItemByCatId)
 			// 刷新购物车
-			item.GET("refresh", api.QueryItemsBySpecIds)
+			item.GET("/api/v1/items/refresh", api.QueryItemsBySpecIds)
 		}
 
-		passport := v1.Group("passport")
+		passport := v1.Group("")
 		{
 			//  判断用户名是否存在
-			passport.GET("usernameIsExist", api.UsernameIsExist)
+			passport.GET("/api/v1/passport/usernameIsExist", api.UsernameIsExist)
 			// 用户注册
-			passport.POST("regist", api.UserRegister)
+			passport.POST("/api/v1/passport/regist", api.UserRegister)
 			// 用户登录
-			passport.POST("login", api.UserLogin)
+			passport.POST("/api/v1/passport/login", api.UserLogin)
 		}
 
 		// 需要登录保护的
@@ -76,58 +84,57 @@ func NewRouter() *gin.Engine {
 		{
 			// User Routing
 			//auth.GET("user/me", api.UserMe)
-			auth.DELETE("user/logout", api.UserLogout)
+			auth.DELETE("/api/v1/user/logout", api.UserLogout)
 
-			passport2 := auth.Group("passport")
+			passport2 := auth.Group("")
 			{
 				// 用户退出
-				passport2.DELETE("logout", api.UserLogout)
+				passport2.DELETE("/api/v1/passport/logout", api.UserLogout)
 			}
 
-			center := auth.Group("center")
+			center := auth.Group("")
 			{
-				center.GET("userInfo", c.QueryUserInfo)
+				center.GET("/api/v1/center/userInfo", c.QueryUserInfo)
 			}
 
-			userInfo := auth.Group("userInfo")
+			userInfo := auth.Group("")
 			{
-				userInfo.POST("update", c.UpdateUserInfo)
-				userInfo.POST("uploadFace", c.UploadFace)
+				userInfo.POST("/api/v1/userInfo/update", c.UpdateUserInfo)
+				userInfo.POST("/api/v1/userInfo/uploadFace", c.UploadFace)
 			}
 
-			myComments := auth.Group("mycomment")
+			myComments := auth.Group("")
 			{
-				myComments.POST("pending", c.Pending)
-				myComments.GET("query", c.QueryMyComment)
-				myComments.POST("saveList", c.SaveCommentList)
+				myComments.POST("/api/v1/mycomment/pending", c.Pending)
+				myComments.GET("/api/v1/mycomment/query", c.QueryMyComment)
+				myComments.POST("/api/v1/mycomment/saveList", c.SaveCommentList)
 			}
 
-			myOrders := auth.Group("my_orders")
+			myOrders := auth.Group("")
 			{
-				myOrders.GET("query", c.QueryMyOrders)
-				myOrders.GET("trend", c.QueryTrend)
-				myOrders.GET("status_counts", c.StatusCounts)
-				myOrders.POST("deliver", c.Deliver)
-				myOrders.POST("confirm_receive", c.ConfirmReceiver)
-				myOrders.DELETE("order", c.DeleteOrder)
+				myOrders.GET("/api/v1/my_orders/query", c.QueryMyOrders)
+				myOrders.GET("/api/v1/my_orders/trend", c.QueryTrend)
+				myOrders.GET("/api/v1/my_orders/status_counts", c.StatusCounts)
+				myOrders.POST("/api/v1/my_orders/deliver", c.Deliver)
+				myOrders.POST("/api/v1/my_orders/confirm_receive", c.ConfirmReceiver)
+				myOrders.DELETE("/api/v1/my_orders/order", c.DeleteOrder)
 			}
 
-			address := auth.Group("address")
+			address := auth.Group("")
 			{
-				address.GET("list", api.QueryAllAddress)
-				address.POST("add", api.AddAddress)
+				address.GET("/api/v1/address/list", api.QueryAllAddress)
+				address.POST("/api/v1/address/add", api.AddAddress)
 			}
 
-			shopCart := auth.Group("shop_cart")
+			shopCart := auth.Group("")
 			{
-				shopCart.POST("add", api.Add)
+				shopCart.POST("/api/v1/shop_cart/add", api.Add)
 			}
 
-			order := auth.Group("orders")
+			order := auth.Group("")
 			{
-				order.POST("create", api.CreateOrder)
-				order.GET("paid_order_info", api.GetPaidOrderInfo)
-
+				order.POST("/api/v1/orders/create", api.CreateOrder)
+				order.GET("/api/v1/orders/paid_order_info", api.GetPaidOrderInfo)
 			}
 		}
 

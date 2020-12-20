@@ -6,10 +6,10 @@ import (
 	"go-foodie-shop/api"
 	"go-foodie-shop/middleware/log"
 	"go-foodie-shop/model"
-	"go-foodie-shop/serializer"
 	"go-foodie-shop/service"
 	"go-foodie-shop/util"
 	"go.uber.org/zap"
+	"net/http"
 )
 
 // Pending 查询我的订单动态
@@ -23,17 +23,14 @@ func Pending(c *gin.Context) {
 				zap.String("userId", orderRequest.UserId),
 				zap.Error(err),
 			)
-			c.JSON(200, api.ErrorResponse(errors.New("查询订单失败")))
+			c.JSON(http.StatusOK, api.ErrorResponse(errors.New("查询订单失败")))
 			return
 		}
 
 		log.ServiceLog.Info("查询订单成功", zap.Any("orderItems", orderItems))
-		c.JSON(200, serializer.Response{
-			Status: 200,
-			Data:   orderItems,
-		})
+		c.JSON(http.StatusOK, api.SuccessResponse(orderItems))
 	} else {
-		c.JSON(400, api.ErrorResponse(err))
+		c.JSON(http.StatusBadRequest, api.ErrorResponse(err))
 	}
 }
 
@@ -48,19 +45,16 @@ func QueryMyComment(c *gin.Context) {
 				zap.String("userId", queryMyCommentRequest.UserId),
 				zap.Error(err),
 			)
-			c.JSON(200, api.ErrorResponse(errors.New("查询订单失败")))
+			c.JSON(http.StatusOK, api.ErrorResponse(errors.New("查询订单失败")))
 			return
 		}
 
 		log.ServiceLog.Info("查询订单成功", zap.Any("commentVOS", commentVOS))
 		result := util.PagedGridResult(commentVOS, total, queryMyCommentRequest.Page.Page, queryMyCommentRequest.PageSize)
 
-		c.JSON(200, serializer.Response{
-			Status: 200,
-			Data:   result,
-		})
+		c.JSON(http.StatusOK, api.SuccessResponse(result))
 	} else {
-		c.JSON(400, api.ErrorResponse(err))
+		c.JSON(http.StatusBadRequest, api.ErrorResponse(err))
 	}
 }
 
@@ -68,27 +62,25 @@ func QueryMyComment(c *gin.Context) {
 func SaveCommentList(c *gin.Context) {
 	var itemsComments []model.OrderItemsComment
 	if err := c.ShouldBindJSON(&itemsComments); err == nil {
-		orderId := c.Query("orderId")
-		if "" == orderId {
-			c.JSON(400, api.ErrorResponse(errors.New("orderId 为空")))
+		orderId, b := c.GetQuery("orderId")
+		if !b {
+			c.JSON(http.StatusBadRequest, api.ErrorResponse(errors.New("orderId 为空")))
 			return
 		}
 		userId := c.Query("userId")
 		if "" == orderId {
-			c.JSON(400, api.ErrorResponse(errors.New("userId 为空")))
+			c.JSON(http.StatusBadRequest, api.ErrorResponse(errors.New("userId 为空")))
 			return
 		}
 
 		err := service.SaveMyComment(userId, orderId, itemsComments)
 		if err != nil {
-			c.JSON(200, api.ErrorResponse(err))
+			c.JSON(http.StatusOK, api.ErrorResponse(err))
 			return
 		}
 
-		c.JSON(200, serializer.Response{
-			Status: 200,
-		})
+		c.JSON(http.StatusOK, api.SuccessResponse(nil))
 	} else {
-		c.JSON(400, api.ErrorResponse(err))
+		c.JSON(http.StatusBadRequest, api.ErrorResponse(err))
 	}
 }

@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"go-foodie-shop/cache"
-	"go-foodie-shop/serializer"
 	"go-foodie-shop/service"
+	"net/http"
 )
 
 const ShopCart = "shopcart"
@@ -17,7 +17,7 @@ func Add(c *gin.Context) {
 	if err := c.ShouldBind(&addShopCatItemRequest); err == nil {
 		userId, b := c.GetQuery("userId")
 		if !b {
-			c.JSON(400, ErrorResponse(err))
+			c.JSON(http.StatusBadRequest, ErrorResponse(err))
 		}
 		addShopCatItemRequest.UserId = userId
 
@@ -36,7 +36,7 @@ func Add(c *gin.Context) {
 			//} else {
 			err = json.Unmarshal([]byte(redisShopCartKey), &shopCartBOS)
 			if err != nil {
-				c.JSON(400, ErrorResponse(err))
+				c.JSON(http.StatusBadRequest, ErrorResponse(err))
 				return
 			}
 			isExist := false
@@ -64,15 +64,13 @@ func Add(c *gin.Context) {
 		//)
 
 		if err != nil {
-			c.JSON(200, ErrorResponse(err))
+			c.JSON(http.StatusOK, ErrorResponse(err))
 			return
 		}
 
 		fmt.Println(err)
-		c.JSON(200, serializer.Response{
-			Status: 200,
-		})
+		c.JSON(http.StatusOK, SuccessResponse(nil))
 	} else {
-		c.JSON(400, ErrorResponse(err))
+		c.JSON(http.StatusBadRequest, ErrorResponse(err))
 	}
 }
