@@ -32,6 +32,7 @@ func Redis() {
 
 	if err != nil {
 		log.ServiceLog.Error("连接Redis不成功", zap.Error(err))
+		panic(err)
 		//util.Log().Panic("连接Redis不成功", err)
 	}
 
