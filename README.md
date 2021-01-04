@@ -19,7 +19,7 @@
 # TODO
 
 - Docker 部署管理项目
-  - redis、mysql 及项目 运行在docker上
+  - redis、mysql 及项目 运行在docker上(ing....)
   - 之后所有组件也是用 docker 管理
 - 使用 ES 完成关键词搜索功能
 - 使用 MQ 完成消息队列
