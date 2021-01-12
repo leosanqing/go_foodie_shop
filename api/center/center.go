@@ -57,6 +57,7 @@ func UpdateUserInfo(c *gin.Context) {
 	}
 }
 
+// UploadFace 上传用户头像
 func UploadFace(c *gin.Context) {
 	var uploadFaceRequest = service.UploadFaceRequest{}
 	if err := c.ShouldBind(&uploadFaceRequest); err == nil {
@@ -67,7 +68,8 @@ func UploadFace(c *gin.Context) {
 		}
 
 		uploadFaceRequest.UserId = userId
-		userInfo, err := uploadFaceRequest.UploadFace(c)
+		//userInfo, err := uploadFaceRequest.UploadFace(c)
+		userInfo, err := uploadFaceRequest.UploadFaceMinIO(c)
 		if err != nil {
 			log.ServiceLog.Error(
 				"用户上传头像失败",

@@ -104,7 +104,7 @@ func TestUpdateUserInfo(t *testing.T) {
 		Email:    email,
 	})
 
-	req, _ := http.NewRequest("POST", "/api/v1/userInfo/update?userId="+userIdLeosanqing, NewBuffer(marshal))
+	req, _ := http.NewRequest("POST", "/api/v1/user-info/update?userId="+userIdLeosanqing, NewBuffer(marshal))
 	//cookie, err := req.Cookie("user")
 	header := http.Header{}
 	header.Add("headerUserId", userIdLeosanqing)
@@ -143,7 +143,7 @@ func TestUploadFace_shouldErr_byNoAuth(t *testing.T) {
 		Email:    email,
 	})
 
-	req, _ := http.NewRequest("POST", "/api/v1/userInfo/update?userId=19120779W7TK6800", NewBuffer(marshal))
+	req, _ := http.NewRequest("POST", "/api/v1/user-info/update?userId=19120779W7TK6800", NewBuffer(marshal))
 	R.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
@@ -152,43 +152,3 @@ func TestUploadFace_shouldErr_byNoAuth(t *testing.T) {
 	_ = json.Unmarshal(w.Body.Bytes(), &res)
 	assert.Equal(t, serializer.CodeCheckLogin, res.Status)
 }
-
-// TODO 上传用户头像
-//func TestUploadFace(t *testing.T) {
-//
-//	w := httptest.NewRecorder()
-//	runes := util.RandStringRunes(2)
-//	realName := "leo" + runes
-//	nickName := "leosanqing" + runes
-//	email := "leosanqing" + runes + "@qq.com"
-//
-//	marshal, _ := json.Marshal(&service.UpdateUserInfoRequest{
-//		Realname: realName,
-//		Nickname: nickName,
-//		Email:    email,
-//	})
-//
-//	req, _ := http.NewRequest("POST", "/api/v1/userInfo/update?userId=19120779W7TK6800", NewBuffer(marshal))
-//	//cookie, err := req.Cookie("user")
-//	header := http.Header{}
-//	header.Add("headerUserId", userId)
-//	header.Add("headerUserToken", *tokenImooc)
-//	req.Header = header
-//
-//	R.ServeHTTP(w, req)
-//
-//	assert.Equal(t, http.StatusOK, w.Code)
-//
-//	var res serializer.Response
-//	_ = json.Unmarshal(w.Body.Bytes(), &res)
-//	assert.Equal(t, api.Success, res.Status)
-//
-//	// FIXME 指针转换异常问题
-//	//var users model.Users
-//	//err := gconv.Struct(res.Data, &users)
-//	//fmt.Println(err)
-//	//
-//	//assert.Equal(t, "1327842402731298816", users.Id)
-//	//assert.Equal(t, "leosanqing", users.Username)
-//	//assert.Equal(t, "", users.Password)
-//}
