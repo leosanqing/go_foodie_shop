@@ -99,8 +99,8 @@ func NewRouter() *gin.Engine {
 
 			userInfo := auth.Group("")
 			{
-				userInfo.POST("/api/v1/userInfo/update", c.UpdateUserInfo)
-				userInfo.POST("/api/v1/userInfo/uploadFace", c.UploadFace)
+				userInfo.POST("/api/v1/user-info/update", c.UpdateUserInfo)
+				userInfo.POST("/api/v1/user-info/upload-face", c.UploadFace)
 			}
 
 			myComments := auth.Group("")

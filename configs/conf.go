@@ -4,6 +4,7 @@ import (
 	"github.com/joho/godotenv"
 	"go-foodie-shop/cache"
 	"go-foodie-shop/model"
+	third_part "go-foodie-shop/third-part"
 	"go-foodie-shop/util"
 	"os"
 )
@@ -25,4 +26,5 @@ func Init() {
 	// 连接数据库
 	model.Database(os.Getenv("MYSQL_DSN"))
 	cache.Redis()
+	third_part.MinIO()
 }

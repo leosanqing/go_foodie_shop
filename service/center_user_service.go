@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"go-foodie-shop/model"
+	third_part "go-foodie-shop/third-part"
 	"mime/multipart"
 	"path/filepath"
 	"strings"
@@ -76,6 +77,53 @@ func (service *UpdateUserInfoRequest) UpdateUserInfo(c *gin.Context) (model.User
 	return user, err
 }
 
+// UploadFaceMinIO 使用 MinIO 对文件进行上传
+func (service *UploadFaceRequest) UploadFaceMinIO(c *gin.Context) (model.Users, error) {
+	var user model.Users
+	user.Id = service.UserId
+
+	filename := service.File.Filename
+
+	if filename == "" {
+		return user, errors.New("未获取到文件名")
+	}
+	split := strings.Split(filename, `.`)
+	suffix := split[len(split)-1]
+
+	// 判断文件格式
+	if !strings.EqualFold(suffix, Png) &&
+		!strings.EqualFold(suffix, Jpg) &&
+		!strings.EqualFold(suffix, Jpeg) {
+		return user, errors.New("图片格式不正确")
+	}
+
+	// 生成新文件名
+	newFileName := "face-" + service.UserId + "." + split[len(split)-1]
+	filename, err := third_part.UploadFile(newFileName, c, service.File)
+
+	if err != nil {
+		return model.Users{}, err
+	}
+	user.Face = newFileName
+	err = model.DB.
+		Model(&user).
+		Update(&user).
+		Error
+
+	if err != nil {
+		return model.Users{}, err
+	}
+
+	queryUserInfoRequest := QueryUserInfoRequest{UserId: service.UserId}
+	info, err := queryUserInfoRequest.QueryUserInfo()
+	if err != nil {
+		return model.Users{}, err
+	}
+	vo := info.ConvertUsersVO()
+	SetCookie(c, vo)
+	return info, nil
+}
+
 func (service *UploadFaceRequest) UploadFace(c *gin.Context) (model.Users, error) {
 	var user model.Users
 	user.Id = service.UserId
@@ -128,8 +176,4 @@ func (service *UploadFaceRequest) UploadFace(c *gin.Context) (model.Users, error
 	vo := info.ConvertUsersVO()
 	SetCookie(c, vo)
 	return info, nil
-}
-
-func UpdateUserFace() {
-
 }
