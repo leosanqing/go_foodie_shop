@@ -246,7 +246,7 @@ func (r *QueryPaidOrderInfoRequest) QueryPaidOrderInfo() (model.OrderStatus, err
 	}
 
 	log.ServiceLog.Info(
-		"查询订单信息异常",
+		"查询订单信息异成功",
 		zap.Any("orderStatus", orderStatus),
 	)
 	return orderStatus, nil
