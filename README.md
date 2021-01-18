@@ -12,6 +12,12 @@
 
 本项目用到的知识或者组件部署步骤，都放在 doc 目录下
 
+1. [Docker 安装ES](https://github.com/leosanqing/go_foodie_shop/blob/master/doc/ES%20Docker%E9%83%A8%E7%BD%B2%E5%8F%8A%E8%B0%83%E7%94%A8.md) 
+
+2. [Docker 部署 Go 项目](https://github.com/leosanqing/go_foodie_shop/blob/master/doc/Docker%E9%83%A8%E7%BD%B2%E9%A1%B9%E7%9B%AE.md)
+
+   
+
 # 更新日志
 
 1. 2021.01.10 使用 MinIO 文件管理 进行头像上传的相关管理
