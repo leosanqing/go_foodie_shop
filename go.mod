@@ -14,10 +14,11 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.0
 	github.com/minio/minio-go/v7 v7.0.6
 	github.com/natefinch/lumberjack v2.0.0+incompatible
+	github.com/olivere/elastic/v7 v7.0.22
 	github.com/onsi/ginkgo v1.14.2 // indirect
 	github.com/onsi/gomega v1.10.3 // indirect
 	github.com/shopspring/decimal v1.2.0
-	github.com/stretchr/testify v1.4.0
+	github.com/stretchr/testify v1.5.1
 	go.uber.org/zap v1.16.0
 	golang.org/x/crypto v0.0.0-20200709230013-948cd5f35899
 	gopkg.in/go-playground/validator.v8 v8.18.2

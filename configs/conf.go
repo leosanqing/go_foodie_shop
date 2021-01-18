@@ -27,4 +27,5 @@ func Init() {
 	model.Database(os.Getenv("MYSQL_DSN"))
 	cache.Redis()
 	third_part.MinIO()
+	third_part.NewEsClient()
 }
